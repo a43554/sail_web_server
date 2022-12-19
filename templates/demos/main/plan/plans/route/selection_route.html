@@ -1,0 +1,27 @@
+<li class="c-sidebar-menu collapse">
+    <ul class="c-dropdown c-open" style="text-align:center; pointer-events: none; padding-left: 0">
+        <h1 style="font-size: large" href="javascript:;">Rota</h1>
+    </ul>
+</li>
+<li id="selection__route_path" onclick="toggleEvent(this)" class="" {% if data.route_path.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_route_path_content" aria-expanded="true">Trajeto
+        {% if data.route_path.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.route_path.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>
+<li id="selection__route_duration" onclick="toggleEvent(this)" class="" {% if data.route_duration.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_route_duration_content" aria-expanded="false">Duração
+        {% if data.route_duration.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.route_duration.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>

@@ -1,0 +1,247 @@
+{% for task in data.assignments_tasks %}
+    <div class="panel tab-pane" id="tab_assignments_tasks_{{ forloop.counter }}_content">
+        <div class="c-content-title-1">
+            <h3 class="c-font-uppercase c-font-bold">Tarefas</h3>
+            <div class="c-line-left"></div>
+        </div>
+        <form id="form_assignments_tasks_{{ forloop.counter }}" class="panel panel-success tab-pane">
+            <div class="panel-heading">
+                <h3 class="panel-title" style="text-align:center;">
+                    Função
+                    {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                        <button id="button_assignments_tasks_{{ forloop.counter }}" type="submit" onclick="validateAssignmentsTasks(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>
+                    {% endif %}
+                    <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+                </h3>
+            </div>
+            <fieldset disabled="disabled" class="panel-body">
+                <div class="c-shop-form-1">
+                    <!-- BEGIN: ADDRESS FORM -->
+                    <div class="">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                <div class="row">
+                                    <div class="form-group col-md-3" style="margin-top: 15px; text-align:center;">
+                                        <label for="task_number" class="control-label center">ID:</label>
+                                    </div>
+                                    <div class="form-group col-md-8" style="margin-top: 15px">
+                                        <input value="Tarefa {{ forloop.counter }}" name="task_number" type="text" id="task_number" disabled class="form-control c-square c-theme" placeholder="ID de tarefa">
+                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                    </div>
+                                </div>
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                <div class="row">
+                                    <div class="form-group col-md-3" style="margin-top: 15px; text-align:center;">
+                                        <label class="control-label center">Nome Tarefa:</label>
+                                    </div>
+                                    <div class="form-group col-md-8" style="margin-top: 15px">
+                                        <input value="{{ task.content.name }}" name="task_name" type="text" id="task_name" class="form-control c-square c-theme" placeholder="Nome que descreve a tarefa">
+                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                    </div>
+                                </div>
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                <div class="row">
+                                    <div class="form-group col-md-3" style="margin-top: 15px; text-align:center;">
+                                        <label class="control-label center">Descrição:</label>
+                                    </div>
+                                    <div class="form-group col-md-8" style="margin-top: 15px">
+                                        <textarea name="task_description" type="text" id="task_description" class="form-control c-square c-theme" placeholder="Descrição da tarefa">{{ task.content.description }}</textarea>
+                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                    </div>
+                                </div>
+
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+
+                                <div id="shift_table_selection_row_{{ forloop.counter }}" class="row c-margin-t-20">
+                                    <div class="form-group col-md-12" role="group" style="display: flex; justify-content: center;">
+                                        <div class="c-body" style="margin: 0; padding: 0">
+                                            <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                                <thead>
+                                                    <tr id="day_counter_holder" class="active">
+                                                        <th style="border-color: #000000; width: 20%" class="c-center">Turnos Válidos</th>
+                                                        {% for _ in ''|center:data.assignments_settings.content.total_days %}
+                                                            <th id="day_counter" style="border-color: #000000" class="c-size-md c-center">Dia<br>{{ forloop.counter }}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="valid_shifts_body_task_{{ forloop.counter }}">
+                                                    {% for valid_array in task.content.valid_shifts %}
+                                                        <tr>
+                                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Turno {{ forloop.counter }}</th>
+                                                            {% for is_valid in valid_array %}
+                                                                <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                                                    <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                                                                        <div class="c-checkbox has-success">
+                                                                            <input {% if is_valid %} checked {% endif %} name="task_{{ forloop.parentloop.parentloop.counter }}_valid_shift_input_{{ forloop.counter }}_{{ forloop.parentloop.counter }}" type="checkbox" id="task_{{ forloop.parentloop.parentloop.counter }}_valid_shift_input_{{ forloop.counter }}_{{ forloop.parentloop.counter }}" class="c-check">
+                                                                            <label style="padding: 0; display:inline-block;" for="task_{{ forloop.parentloop.parentloop.counter }}_valid_shift_input_{{ forloop.counter }}_{{ forloop.parentloop.counter }}">
+                                                                                <span style="display: none;" class="inc"></span>
+                                                                                <span class="check"></span>
+                                                                                <span class="box"></span>
+                                                                                &nbsp;&nbsp;&nbsp;
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </th>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-7" style="margin-top: 15px; text-align:center;">
+                                        <label for="min_max_people_per_task" class="control-label center">Minimo/Maximo pessoas por tarefa num turno:</label>
+                                    </div>
+                                    <div class="form-group col-md-2" style="margin-top: 15px">
+                                        <input name="task_{{ forloop.counter }}_min_people_present_in_each_slot" id="min_max_people_per_task" type="text" value="{{ task.content.people_per_shift_task.min_amount }}" required class="form-control c-square c-theme" placeholder="min">
+                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                    </div>
+                                    <div class="form-group col-md-2" style="margin-top: 15px">
+                                        <input name="task_{{ forloop.counter }}_max_people_present_in_each_slot" id="min_max_people_per_task" type="text" value="{{ task.content.people_per_shift_task.max_amount }}" required class="form-control c-square c-theme" placeholder="max">
+                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                    </div>
+                                </div>
+
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+
+                                <div style="margin-top: 15px" class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="per_person_cycle_settings__heading__for_task_{{ forloop.counter }}">
+                                        <div class="form-group" style="margin-top: 10px; margin-bottom: 0">
+                                            <div class="c-checkbox-inline">
+                                                <div class="c-checkbox has-success">
+                                                    <input {% if task.content.per_person_cycle_settings != null %} checked="" {% endif %} name="task_{{ forloop.counter }}_per_person_cycle_settings_switch" type="checkbox" id="task_{{ forloop.counter }}_per_person_cycle_settings_switch" class="c-check">
+                                                    <label for="task_{{ forloop.counter }}_per_person_cycle_settings_switch">
+                                                        <span style="display: none;" class="inc"></span>
+                                                        <span class="check"></span>
+                                                        <span class="box"></span>
+                                                         <a>Opções Tripulantes/Ciclo</a>
+                                                         <a id="per_person_cycle_settings__trigger__for_task_{{ forloop.counter }}" data-toggle="collapse" data-parent="#accordion-100" href="#per_person_cycle_settings__collapse__for_task_{{ forloop.counter }}" hidden aria-expanded="true" aria-controls="per_person_cycle_settings__collapse__for_task_{{ forloop.counter }}">Opções Sequenciais</a>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="per_person_cycle_settings__collapse__for_task_{{ forloop.counter }}" class="panel-collapse collapse {% if task.content.per_person_cycle_settings != null %} in {% endif %}" role="tabpanel" aria-labelledby="per_person_cycle_settings__heading__for_task_{{ forloop.counter }}" style="" aria-expanded="true">
+                                        <div class="panel-body c-font-18">
+                                            <div class="row">
+                                                <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                    <label for="task_{{ forloop.counter }}_per_person_cycle_settings_options_cycle" class="control-label center">Numero de turnos correspondentes a um ciclo:</label>
+                                                </div>
+                                                <div class="form-group col-md-2" style="margin-top: 15px">
+                                                    <input name="task_{{ forloop.counter }}_per_person_cycle_settings_options_cycle" id="task_{{ forloop.counter }}_per_person_cycle_settings_options_cycle" type="text" {% if task.content.per_person_cycle_settings != null %} value="{{ task.content.per_person_cycle_settings.total_shifts_per_cycle }}" {% endif %} class="form-control c-square c-theme" placeholder="Total">
+                                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                </div>
+                                                <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                    <label for="task_{{ forloop.counter }}_per_person_cycle_settings_options_target" class="control-label center">Numero de turnos que cada pessoa têm que ocupar num ciclo:</label>
+                                                </div>
+                                                <div class="form-group col-md-2" style="margin-top: 15px">
+                                                    <input name="task_{{ forloop.counter }}_per_person_cycle_settings_options_target" id="task_{{ forloop.counter }}_per_person_cycle_settings_options_target" type="text" {% if task.content.per_person_cycle_settings != null %} value="{{ task.content.per_person_cycle_settings.assigned_shifts_per_cycle }}" {% endif %} class="form-control c-square c-theme" placeholder="Objectivo">
+                                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                <div style="margin-top: 15px" class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="per_task_cycle_settings__heading__for_task_{{ forloop.counter }}">
+                                        <div class="form-group" style="margin-top: 10px; margin-bottom: 0">
+                                            <div class="c-checkbox-inline">
+                                                <div class="c-checkbox has-success">
+                                                    <input {% if task.content.per_task_cycle_settings != null %} checked="" {% endif %} name="task_{{ forloop.counter }}_per_task_cycle_settings_switch" type="checkbox" id="task_{{ forloop.counter }}_per_task_cycle_settings_switch" class="c-check">
+                                                    <label for="task_{{ forloop.counter }}_per_task_cycle_settings_switch">
+                                                        <span style="display: none;" class="inc"></span>
+                                                        <span class="check"></span>
+                                                        <span class="box"></span>
+                                                        <a>Opções Tarefas/Ciclo</a>
+                                                        <a id="per_task_cycle_settings__trigger__for_task_{{ forloop.counter }}" data-toggle="collapse" data-parent="#accordion-100" href="#per_task_cycle_settings__collapse__for_task_{{ forloop.counter }}" hidden aria-expanded="true" aria-controls="per_task_cycle_settings__collapse__for_task_{{ forloop.counter }}">Opções Sequenciais</a>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="per_task_cycle_settings__collapse__for_task_{{ forloop.counter }}" class="panel-collapse collapse {% if task.content.per_task_cycle_settings != null %} in {% endif %}" role="tabpanel" aria-labelledby="per_task_cycle_settings__heading__for_task_{{ forloop.counter }}" style="" aria-expanded="true">
+                                        <div class="panel-body c-font-18">
+                                            <div class="row">
+                                                <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                    <label for="task_{{ forloop.counter }}_per_task_cycle_settings_options_cycle" class="control-label center">Nº de turnos correspondentes a um ciclo:</label>
+                                                </div>
+                                                <div class="form-group col-md-2" style="margin-top: 15px">
+                                                    <input name="task_{{ forloop.counter }}_per_task_cycle_settings_options_cycle" id="task_{{ forloop.counter }}_per_task_cycle_settings_options_cycle" type="text" {% if task.content.per_task_cycle_settings != null %} value="{{ task.content.per_task_cycle_settings.total_shifts_per_cycle }}" {% endif %} class="form-control c-square c-theme" placeholder="Total">
+                                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                </div>
+                                                <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                    <label for="task_{{ forloop.counter }}_per_task_cycle_settings_options_target" class="control-label center">Nº de turnos que cada tarefa têm que ser realizada num ciclo:</label>
+                                                </div>
+                                                <div class="form-group col-md-2" style="margin-top: 15px">
+                                                    <input name="task_{{ forloop.counter }}_per_task_cycle_settings_options_target" id="task_{{ forloop.counter }}_per_task_cycle_settings_options_target" type="text" {% if task.content.per_task_cycle_settings != null %} value="{{ task.content.per_task_cycle_settings.assigned_shifts_per_cycle }}" {% endif %} class="form-control c-square c-theme" placeholder="Objectivo">
+                                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                <div style="margin-top: 15px" class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="sequential_settings__heading__for_task_{{ forloop.counter }}">
+                                        <div class="form-group" style="margin-top: 10px; margin-bottom: 0">
+                                            <div class="c-checkbox-inline">
+                                                <div class="c-checkbox has-success">
+                                                    <input {% if task.content.sequential_settings != null %} checked="" {% endif %} name="task_{{ forloop.counter }}_sequential_settings_switch" type="checkbox" id="task_{{ forloop.counter }}_sequential_settings_switch" class="c-check">
+                                                    <label for="task_{{ forloop.counter }}_sequential_settings_switch">
+                                                        <span style="display: none;" class="inc"></span>
+                                                        <span class="check"></span>
+                                                        <span class="box"></span>
+                                                        <a>Opções Sequenciais</a>
+                                                        <a id="sequential_settings__trigger__for_task_{{ forloop.counter }}" data-toggle="collapse" data-parent="#accordion-100" href="#sequential_settings__collapse__for_task_{{ forloop.counter }}" hidden aria-expanded="true" aria-controls="sequential_settings__collapse__for_task_{{ forloop.counter }}">Opções Sequenciais</a>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="sequential_settings__collapse__for_task_{{ forloop.counter }}" class="panel-collapse collapse {% if task.content.sequential_settings != null %} in {% endif %}" role="tabpanel" aria-labelledby="sequential_settings__heading__for_task_{{ forloop.counter }}" style="" aria-expanded="true">
+                                        <div class="panel-body c-font-18">
+                                            <div class="row">
+                                                <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                    <label for="path_0" class="control-label center">Diversificar turnos</label>
+                                                </div>
+                                                <div class="form-group col-md-2" style="margin-top: 10px; margin-bottom: 0">
+                                                    <div class="c-checkbox-inline">
+                                                        <div class="c-checkbox ">
+                                                            <input {% if task.content.sequential_settings != null and task.content.sequential_settings.diversify_cast %} checked="" {% endif %} name="task_{{ forloop.counter }}_diversify_cast_switch" type="checkbox" id="task_{{ forloop.counter }}_diversify_cast_switch" class="c-check">
+                                                            <label for="task_{{ forloop.counter }}_diversify_cast_switch">
+                                                                <span style="display: none;" class="inc"></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                 Diversificar
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                    <label for="task_{{ forloop.counter }}_sequential_settings_total_shifts" class="control-label center">Nº de turnos que cada pessoa têm que realizar em sequencia:</label>
+                                                </div>
+                                                <div class="form-group col-md-2" style="margin-top: 15px">
+                                                    <input name="task_{{ forloop.counter }}_sequential_settings_total_shifts" id="task_{{ forloop.counter }}_sequential_settings_total_shifts" type="text" {% if task.content.sequential_settings != null %} value="{{ task.content.sequential_settings.number_of_sequential_shifts }}" {% endif %} class="form-control c-square c-theme" placeholder="Objectivo">
+                                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END: ADDRESS FORM -->
+                </div>
+            </fieldset>
+        </form>
+    </div>
+{% endfor %}

@@ -1,0 +1,107 @@
+{% extends "../../headers/header_page.html" %}
+
+{% block content %}
+    <div class="c-content-box c-size-md c-bg-white">
+        <div class="container">
+            <div class="c-content-panel">
+                <div class="c-content-tab-1 c-theme c-margin-t-30">
+                    <div class="clearfix">
+                        <ul class="nav nav-tabs c-font-sbold pull-right">
+                            <li class="active"><a href="#tab_2_1_content" data-toggle="tab" class="c-border-red">Tasks</a></li>
+                            <li><a href="#tab_2_2_content" data-toggle="tab" class="c-border-red">Crew</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-content c-bordered c-padding-lg">
+                        <div class="tab-pane active" id="tab_2_1_content">
+                            <div class="c-body" style="margin: 0; padding: 0">
+                                <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                    <thead>
+                                    <tr class="active">
+                                        <th style="border-color: #000000; width: 10%"></th>
+                                        {% for task in schedule_data.tasks %}
+                                            <th style="border-color: #000000" class="c-size-md c-center">{{ task }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for shift_task_data in schedule_data.shifts %}
+                                        <tr>
+                                            {% for task_data in shift_task_data %}
+                                                {% if forloop.counter0 != 0 %}
+                                                    <td style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                                        <table class="table table-responsive" style="table-layout: fixed; margin: 0">
+                                                            <tbody>
+                                                                <tr>
+                                                                    {% for person in task_data %}
+                                                                        {% if person != null %}
+                                                                            <td style="text-align: center; vertical-align: middle; border-top: 0">{{ person }}</td>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                {% else %}
+                                                     {% for person in task_data %}
+                                                        {% if person != null %}
+                                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ person }}</th>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab_2_2_content">
+                            <div class="c-body" style="margin: 0; padding: 0">
+                                <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                    <thead>
+                                    <tr class="active">
+                                        <th style="border-color: #000000; width: 10%"></th>
+                                        {% for person in schedule_data.crew %}
+                                            <th style="border-color: #000000" class="c-size-md c-center">{{ person }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for shift_data in schedule_data.shifts_by_crew %}
+                                        <tr>
+                                            {% for person_data in shift_data %}
+                                                {% if forloop.counter0 != 0 %}
+                                                    <td style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                                    <table class="table table-responsive" style="table-layout: fixed; margin: 0">
+                                                        <tbody>
+                                                            {% for task in person_data %}
+                                                                {% if task != null %}
+                                                                   <tr>
+                                                                       <td style="text-align: center; vertical-align: middle; border-top: 0">{{ task }}</td>
+                                                                   </tr>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                                {% else %}
+                                                     {% for person in person_data %}
+                                                        {% if person != null %}
+                                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ person }}</th>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

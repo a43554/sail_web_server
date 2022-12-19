@@ -1,0 +1,176 @@
+<style>
+    .disabled-parent {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+</style>
+
+<script>
+    // Function that does nothing
+    function emptyFunction(data, formPairs) {}
+
+
+    function modifySection(section_name, change_to_type) {
+        // Obtain the selector.
+        const selector = $(`#selection__${section_name}`)
+        // The icon.
+        const selectorIcon = selector.find("i:last")
+        // Check the type.
+        if (change_to_type === 'LOCK') {
+            selector.css("pointer-events", "none");
+            selectorIcon.removeClass("fa-check")
+            selectorIcon.removeClass("fa-edit")
+            selectorIcon.addClass("fa-lock")
+            selectorIcon.css('color', 'orange')
+        } else if (change_to_type === 'DONE') {
+            // selector.css("pointer-events", "auto");
+            selector.css("pointer-events", "");
+            selectorIcon.removeClass("fa-edit")
+            selectorIcon.removeClass("fa-lock")
+            selectorIcon.addClass("fa-check")
+            selectorIcon.css('color', 'green')
+        } else if (change_to_type === 'TODO') {
+            // selector.css("pointer-events", "auto");
+            selector.css("pointer-events", "");
+            selectorIcon.removeClass("fa-lock")
+            selectorIcon.removeClass("fa-check")
+            selectorIcon.addClass("fa-edit")
+            selectorIcon.css('color', 'blue')
+        }
+    }
+
+    // Make the API call.
+    function abstractFormSectionSubmission(
+        event,
+        section_name,
+        onSuccess = (data, formPairs) => {},
+        onError = (request, status, error) => {},
+        onEditStartSuccess = (data) => {}
+    ) {
+        // Find the button.
+        const editUnlockButton = $(`#button_${section_name}`);
+        // Disable the button.
+        editUnlockButton.prop('disabled', true);
+        // Prevent submission.
+        event.preventDefault();
+        // Check if it's edit.
+        if( $($(event.target).find("fieldset")).prop("disabled") ) {
+            // Send the request.
+            $.ajax({
+                type: "POST",
+                url: "/api/plans/{{ plan }}/edit",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    data:  JSON.stringify({section: section_name})
+                },
+                dataType: "json",
+                success: function (data) {
+                    // Obtain the lock/unlock data.
+                    const lockUnlockData = data["progress_status"];
+                    // Update the status.
+                    searchDataArray(lockUnlockData);
+                    // Disable the data.
+                    $($(event.target).find("fieldset")).prop("disabled", false);
+                    $('#fieldset_selection_list').addClass("disabled-parent");
+                    onEditStartSuccess(data);
+                    // Edit process.
+                    editUnlockButton.text("Guardar");
+                    // Enable the button.
+                    editUnlockButton.prop('disabled', false);
+                },
+                failure: function (data) {
+                    // Enable the button.
+                    editUnlockButton.prop('disabled', false);
+                    console.log(data);
+                },
+                error: function (request, status, error) {
+                    // Enable the button.
+                    editUnlockButton.prop('disabled', false);
+                }
+            });
+        } else {
+            // Enable the inputs.
+            const disabled_inputs = $(event.target).find(':input:disabled')
+            disabled_inputs.prop('disabled', false);
+            // Obtain the form structure.
+            const formPairs = Object.fromEntries(new FormData(event.target))
+            // Re-enable the inputs.
+            disabled_inputs.prop('disabled', true);
+            // Send the request.
+            $.ajax({
+                type: "POST",
+                url: "/api/plans/{{ plan }}/",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    data:  JSON.stringify({
+                        section: section_name,
+                        content: formPairs,
+                    })
+                },
+                dataType: "json",
+                success: function (data) {
+                    // Obtain the lock/unlock data.
+                    const lockUnlockData = data["progress_status"];
+                    // Update the status.
+                    searchDataArray(lockUnlockData);
+                    // Disable the data.
+                    $($(event.target).find("fieldset")).prop("disabled", true);
+                    $('#fieldset_selection_list').removeClass("disabled-parent");
+                    // Call the on success callback.
+                    onSuccess(data, formPairs);
+                    // Edit process.
+                    editUnlockButton.text("Editar");
+                    // Enable the button.
+                    editUnlockButton.prop('disabled', false);
+                },
+                failure: function(data) {
+                    // Enable the button.
+                    editUnlockButton.prop('disabled', false);
+                    console.log(data);
+                },
+                error: function (request, status, error) {
+                    // Check if warnings exist.
+                    if (request["responseJSON"]["warnings"] !== null) {
+                        // Obtain the data.
+                        const data = request["responseJSON"];
+                        // Obtain the lock/unlock data.
+                        const lockUnlockData = data["progress_status"];
+                        // Update the status.
+                        searchDataArray(lockUnlockData);
+                        // Disable the data.
+                        $($(event.target).find("fieldset")).prop("disabled", true);
+                        $('#fieldset_selection_list').removeClass("disabled-parent");
+                        // Call the on success callback.
+                        onSuccess(data, formPairs);
+                        // Edit process.
+                        editUnlockButton.text("Editar");
+                        // Enable the button.
+                        editUnlockButton.prop('disabled', false);
+                        // Select the modal.
+                        const error_modal_item = $('#warning_info_modal');
+                        // The error code information.
+                        const error_info = request["responseJSON"]["warnings"];
+                        // Change the text.
+                        error_modal_item.find('#warning_model_text_body').text(error_info);
+                        // Show the modal.
+                        error_modal_item.modal('show');
+                    // Otherwise.
+                    } else {
+                        // Select the modal.
+                        const error_modal_item = $('#error_info_modal');
+                        // The error code information.
+                        const error_info = request["responseJSON"]["errors"];
+                        // Change the text.
+                        error_modal_item.find('#error_model_text_body').text(error_info);
+                        // Show the modal.
+                        error_modal_item.modal('show');
+                        // Enable the button.
+                        editUnlockButton.prop('disabled', false);
+                        // Call the on error.
+                        onError(request, status, error);
+                    }
+                }
+            });
+        }
+    }
+</script>

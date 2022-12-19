@@ -1,0 +1,50 @@
+<div class="panel tab-pane" id="tab_assignments_settings_content">
+    <div class="c-content-title-1">
+        <h3 class="c-font-uppercase c-font-bold">Tarefas</h3>
+        <div class="c-line-left"></div>
+    </div>
+    <form id="form_assignments_settings" class="panel panel-success tab-pane">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center;">
+                Definições
+                {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                    <button id="button_assignments_settings" type="submit" onclick="validateAssignmentsSettings(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>
+                {% endif %}
+                <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+            </h3>
+        </div>
+        <fieldset disabled="disabled" class="panel-body">
+            <div class="c-shop-form-1">
+                <!-- BEGIN: ADDRESS FORM -->
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            <div class="row">
+                                <div class="form-group col-md-5" style="margin-top: 15px; text-align:center;">
+                                    <label for="assignments_total_days" class="control-label center">Número total de dias:</label>
+                                </div>
+                                <div class="form-group col-md-5" style="margin-top: 15px">
+                                    <input name="assignments_total_days" id="assignments_total_days" type="text" value="{{ data.assignments_settings.content.total_days }}" required class="form-control c-square c-theme" placeholder="Número total de turnos">
+                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            <div class="row">
+                                <div class="form-group col-md-5" style="margin-top: 15px; text-align:center;">
+                                    <label for="assignments_turns_per_day" class="control-label center">Número de Turnos por dia:</label>
+                                </div>
+                                <div class="form-group col-md-5" style="margin-top: 15px">
+                                    <input name="assignments_turns_per_day" id="assignments_turns_per_day" type="text" value="{{ data.assignments_settings.content.daily_shifts }}" required class="form-control c-square c-theme" placeholder="Número de turnos por dia">
+                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: ADDRESS FORM -->
+            </div>
+        </fieldset>
+    </form>
+</div>

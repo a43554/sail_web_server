@@ -1,0 +1,72 @@
+<li class="c-sidebar-menu collapse">
+    <ul class="c-dropdown c-open" style="text-align:center; pointer-events: none; padding-left: 0">
+        <h1 style="font-size: large" href="javascript:;">Tarefas</h1>
+    </ul>
+</li>
+<li id="selection__assignments_settings" onclick="toggleEvent(this)" class="" {% if data.assignments_settings.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_assignments_settings_content" aria-expanded="false">Informação
+        {% if data.assignments_settings.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.assignments_settings.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>
+<div id="selection__assignments_tasks" class="" style="pointer-events: none;">
+    <div style="color: #4c4c4c; font-weight: bold; padding-left: 40px; pointer-events: none;">Lista de Tarefas:
+        {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+            {% if data.assignments_settings.status == 'LOCK' %}
+                <i id="append_new_task" onclick="addTaskFromSelector()" class="fa fa-plus" style="color: #3da13b; display: inline-flex; cursor: pointer; pointer-events: none; padding-left: 3px;"></i>
+                <i id="import_new_task" data-toggle="modal" data-target="#task_import_modal" class="fa fa-download" style="color: #16a1de; display: inline-flex; cursor: pointer; pointer-events: none; padding-left: 3px;"></i>
+            {% elif data.assignments_settings.status == 'DONE' %}
+                <i id="append_new_task" onclick="addTaskFromSelector()" class="fa fa-plus" style="color: #3da13b; display: inline-flex; cursor: pointer; pointer-events: auto; padding-left: 3px;"></i>
+                <i id="import_new_task" data-toggle="modal" data-target="#task_import_modal" class="fa fa-download" style="color: #16a1de; display: inline-flex; cursor: pointer; pointer-events: auto; padding-left: 3px;"></i>
+            {% else %}
+                <i id="append_new_task" onclick="addTaskFromSelector()" class="fa fa-plus" style="color: #3da13b; display: inline-flex; cursor: pointer; pointer-events: none; padding-left: 3px;"></i>
+                <i id="import_new_task" data-toggle="modal" data-target="#task_import_modal" class="fa fa-download" style="color: #16a1de; display: inline-flex; cursor: pointer; pointer-events: none; padding-left: 3px;"></i>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% for task in data.assignments_tasks %}
+    <li id="selection__assignments_tasks_{{ forloop.counter }}" onclick="toggleEvent(this)" class="" {% if task.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+        <a style="cursor: pointer;" data-toggle="tab" href="#tab_assignments_tasks_{{ forloop.counter }}_content" aria-expanded="false">
+            {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                <i class="fa fa-close" onclick="removeTaskFromSelector(this)" style="color: red; margin-left: 5%;"></i>{{ task.content.name }}
+            {% else %}
+                <i class="fa fa-close" style="color: red; margin-left: 5%; visibility: hidden;"></i>{{ task.content.name }}
+            {% endif %}
+            {% if task.status == 'LOCK' %}
+                <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+            {% elif task.status == 'DONE' %}
+                <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+            {% else %}
+                <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+            {% endif %}
+        </a>
+    </li>
+{% endfor %}
+<li id="selection__assignments_options" onclick="toggleEvent(this)" class="" {% if data.assignments_options.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_assignments_options_content" aria-expanded="false">Opções
+        {% if data.assignments_options.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.assignments_options.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>
+<li id="selection__assignments_schedule" onclick="toggleEvent(this)" class="" {% if data.assignments_schedule.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_assignments_schedule_content" aria-expanded="false">Plano
+        {% if data.assignments_schedule.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.assignments_schedule.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>

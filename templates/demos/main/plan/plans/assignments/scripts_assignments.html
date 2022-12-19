@@ -1,0 +1,1283 @@
+<script>
+
+    /***************************************************************/
+    ///////////////////////// ASSIGNMENT OPTIONS
+    /***************************************************************/
+
+    let True = true
+    let False = false
+    let None = null
+
+    // All tasks.
+    let all_tasks = {{ data.assignments_tasks|safe }};
+    let all_people = {{ data.general_team.content|safe }};
+
+    function adjustOptions(tasks = all_tasks, members = all_people) {
+        adjustTasks(tasks)
+        adjustTasksAndMembers(tasks, members)
+    }
+
+    function adjustTasks(tasks = all_tasks) {
+        // Reload the shift information.
+        const table = $('#shift_incompatibility_table_row')
+        // Check the task size.
+        if (tasks.length > 1) {
+            table.show()
+            table.prev().show()
+        } else {
+            table.hide()
+            table.prev().hide()
+        }
+        // Variable to contain the last day.
+        let parent_days = table.find("#day_counter_holder")[0];
+        // The final index.
+        let final_day_index = 0;
+        // To delete.
+        const to_delete = [];
+        // Iterate through the days.
+        const all_days = $(parent_days).find(".c-size-md");
+        // Iterate through all days.
+        all_days.each(function(index_2) {
+            // Update the name.
+            const current_loop_element = $(this)
+            // Check if the current index is larger than the final day index.
+            if (index_2 >= tasks.length) {
+                // Add it to the to delete dictionary.
+                to_delete.push(current_loop_element);
+            } else {
+                // Update the name.
+                current_loop_element.text(tasks[index_2]["content"]["name"])
+            }
+            // Update the final index.
+            final_day_index = index_2;
+        })
+        // Check if the final index has not been exceeded.
+        if (final_day_index < tasks.length) {
+            // Add the remaining days.
+            for (let i = final_day_index + 1; i < tasks.length; i++) {
+                // Add the next element.
+                parent_days.insertAdjacentHTML(
+                    'beforeend',
+                    '<th id="day_counter" style="border-color: #000000" class="c-size-md c-center">' + tasks[i]["content"]["name"] + '</th>'
+                );
+            }
+        // Otherwise.
+        } else {
+            // Delete all extra days.
+            to_delete.forEach((elem => elem.remove()));
+        }
+
+        // Variable to contain the last day.
+        const parent_shifts = table.find('tbody[id^="valid_shifts_body_task_"]')[0];
+        // Obtain all rows.
+        const all_rows = $(parent_shifts).find("tr");
+
+        // The rows to delete.
+        const rows_to_delete = [];
+
+        // Iterate through all days.
+        all_rows.each(function(row_index) {
+            // Update the name.
+            const current_loop_element = $(this)
+            // Obtain the current row.
+            const curr_row = current_loop_element[0];
+            // Check if this index is larger than wanted.
+            if (row_index >= tasks.length) {
+                // Add it to the to delete backlog.
+                rows_to_delete.push(curr_row);
+                // Skip this element.
+                return;
+            } else {
+                // Update the text.
+                current_loop_element.find("th:first").text(tasks[row_index]["content"]["name"])
+            }
+            // The final index.
+            let final_shift_index = 0;
+            // To delete.
+            const shifts_to_delete = [];
+            // Iterate through the days.
+            const all_checks = $(this).find(".c-check");
+            // Iterate through all days.
+            all_checks.each(function(index_3) {
+                // Check if the current index is larger than the final day index.
+                if (index_3 >= tasks.length) {
+                    // Add it to the to delete dictionary.
+                    shifts_to_delete.push(
+                        $(this).closest('th')
+                    );
+                }
+                // Update the final index.
+                final_shift_index = index_3;
+            })
+            // Check if the final index has not been exceeded.
+            if (final_shift_index < tasks.length) {
+                // Add the remaining days.
+                for (let i = final_shift_index + 1; i < tasks.length; i++) {
+                    // Add the next element.
+                    curr_row.insertAdjacentHTML(
+                        'beforeend',
+                        `
+                            <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                                    <div ${ tasks[row_index]['content']['true_id'] === tasks[i]['content']['true_id'] ? 'style="display: none"' : ''} class="c-checkbox has-success">
+                                        <input onclick="switchCheckBox(this)" ${ tasks[row_index]['content']['true_id'] === tasks[i]['content']['true_id'] ? 'disabled' : '' } ${ !tasks[row_index]['content']['incompatible_tasks'].includes(tasks[i]['content']['true_id']) ? 'checked' : ''} name="incompatible_tasks__${ tasks[row_index]['content']['true_id'] }__${ tasks[i]['content']['true_id'] }" type="checkbox" id="incompatible_tasks__${ tasks[row_index]['content']['true_id'] }__${ tasks[i]['content']['true_id'] }" class="c-check">
+                                        <label style="padding: 0; display:inline-block;" for="incompatible_tasks__${ tasks[row_index]['content']['true_id'] }__${ tasks[i]['content']['true_id'] }">
+                                            <span style="display: none;" class="inc"></span>
+                                            <span class="check"></span>
+                                            <span class="box"></span>
+                                            &nbsp;&nbsp;&nbsp;
+                                        </label>
+                                    </div>
+                                </div>
+                            </th>
+                        `
+                    );
+                }
+            // Otherwise.
+            } else {
+                // Delete all extra days.
+                shifts_to_delete.forEach((elem => elem.remove()));
+            }
+        });
+
+        // Delete all extra rows.
+        rows_to_delete.forEach((elem => elem.remove()));
+
+        // Check if there are any rows to delete.
+        if (rows_to_delete.length !== 0) return;
+
+        // Obtain the current number.
+        const curr_number = $(parent_shifts).find('tr').length;
+
+        // Add the remaining days.
+        for (let next_number = curr_number; next_number < tasks.length; next_number++) {
+            // The text for each cell.
+            let cell_text = ''
+            // Add the remaining days.
+            for (let day = 0; day < tasks.length; day++) {
+                cell_text += `
+                    <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                        <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                            <div ${ tasks[next_number]['content']['true_id'] === tasks[day]['content']['true_id'] ? 'style="display: none"' : ''} class="c-checkbox has-success">
+                                <input onclick="switchCheckBox(this)" ${ tasks[next_number]['content']['true_id'] === tasks[day]['content']['true_id'] ? 'disabled' : '' } ${ !tasks[next_number]['content']['incompatible_tasks'].includes(tasks[day]['content']['true_id']) ? 'checked' : ''} name="incompatible_tasks__${ tasks[next_number]['content']['true_id'] }__${ tasks[day]['content']['true_id'] }" type="checkbox" id="incompatible_tasks__${ tasks[next_number]['content']['true_id'] }__${ tasks[day]['content']['true_id'] }" class="c-check">
+                                <label style="padding: 0; display:inline-block;" for="incompatible_tasks__${ tasks[next_number]['content']['true_id'] }__${ tasks[day]['content']['true_id'] }">
+                                    <span style="display: none;" class="inc"></span>
+                                    <span class="check"></span>
+                                    <span class="box"></span>
+                                    &nbsp;&nbsp;&nbsp;
+                                </label>
+                            </div>
+                        </div>
+                    </th>
+                `
+            }
+
+            // Create a new row.
+            parent_shifts.insertAdjacentHTML(
+                'beforeend',
+                `
+                    <tr>
+                        <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${tasks[next_number]['content']['id']}</th>
+                        ${cell_text}
+                    </tr>
+                `
+            );
+        }
+    }
+
+    function adjustTasksAndMembers(tasks, members) {
+        // Reload the shift information.
+        const table = $('#team_incompatibility_table_row')
+        // Check the task size.
+        if (tasks.length > 0) {
+            table.show()
+            table.prev().show()
+        } else {
+            table.hide()
+            table.prev().hide()
+        }
+        // Variable to contain the last day.
+        let parent_days = table.find("#day_counter_holder")[0];
+        // The final index.
+        let final_day_index = -1;
+        // To delete.
+        const to_delete = [];
+        // Iterate through the days.
+        const all_days = $(parent_days).find(".c-size-md");
+        // Iterate through all days.
+        all_days.each(function (index_2) {
+            // Update the name.
+            const current_loop_element = $(this)
+            // Check if the current index is larger than the final day index.
+            if (index_2 >= tasks.length) {
+                // Add it to the to delete dictionary.
+                to_delete.push(current_loop_element);
+            } else {
+                // Update the name.
+                current_loop_element.text(tasks[index_2]["content"]["name"])
+            }
+            // Update the final index.
+            final_day_index = index_2;
+        })
+        // Check if the final index has not been exceeded.
+        if (final_day_index < tasks.length) {
+            // Add the remaining days.
+            for (let i = final_day_index + 1; i < tasks.length; i++) {
+                // Add the next element.
+                parent_days.insertAdjacentHTML(
+                    'beforeend',
+                    '<th id="day_counter" style="border-color: #000000" class="c-size-md c-center">' + tasks[i]["content"]["name"] + '</th>'
+                );
+            }
+            // Otherwise.
+        } else {
+            // Delete all extra days.
+            to_delete.forEach((elem => elem.remove()));
+        }
+
+        // Variable to contain the last day.
+        const parent_shifts = table.find('tbody[id^="valid_shifts_body_task_"]')[0];
+        // Obtain all rows.
+        const all_rows = $(parent_shifts).find("tr");
+
+        // The rows to delete.
+        const rows_to_delete = [];
+
+        // Iterate through all days.
+        all_rows.each(function (row_index) {
+            // Obtain the current row.
+            const curr_row = $(this)[0];
+            // Check if this index is larger than wanted.
+            if (row_index >= members.length) {
+                // Add it to the to delete backlog.
+                rows_to_delete.push(curr_row);
+                // Skip this element.
+                return;
+            }
+            // The final index.
+            let final_shift_index = -1;
+            // To delete.
+            const shifts_to_delete = [];
+            // Iterate through the days.
+            const all_checks = $(this).find(".c-check");
+            // Iterate through all days.
+            all_checks.each(function (index_3) {
+                // Check if the current index is larger than the final day index.
+                if (index_3 >= tasks.length) {
+                    // Add it to the to delete dictionary.
+                    shifts_to_delete.push(
+                        $(this).closest('th')
+                    );
+                }
+                // Update the final index.
+                final_shift_index = index_3;
+            })
+            // Check if the final index has not been exceeded.
+            if (final_shift_index < tasks.length) {
+                // Add the remaining days.
+                for (let i = final_shift_index + 1; i < tasks.length; i++) {
+                    // Add the next element.
+                    curr_row.insertAdjacentHTML(
+                        'beforeend',
+                        `
+                            <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                                    <div class="c-checkbox has-success">
+                                        <input ${ tasks[i]['content']['qualified_members'].includes(members[row_index]['user_id']) ? "checked" : "" }  name="incompatible_team__${ tasks[i]["content"]["true_id"] }__${ members[row_index]['user_id'] }" type="checkbox" id="incompatible_tasks__${ tasks[i]["content"]["true_id"] }__${ members[row_index]['user_id'] }" class="c-check">
+                                        <label style="padding: 0; display:inline-block;" for="incompatible_tasks__${ tasks[i]["content"]["true_id"] }__${ members[row_index]['user_id'] }">
+                                            <span style="display: none;" class="inc"></span>
+                                            <span class="check"></span>
+                                            <span class="box"></span>
+                                            &nbsp;&nbsp;&nbsp;
+                                        </label>
+                                    </div>
+                                </div>
+                            </th>
+                        `
+                    );
+                }
+                // Otherwise.
+            } else {
+                // Delete all extra days.
+                shifts_to_delete.forEach((elem => elem.remove()));
+            }
+        });
+
+        // Delete all extra rows.
+        rows_to_delete.forEach((elem => elem.remove()));
+
+        // Check if there are any rows to delete.
+        if (rows_to_delete.length !== 0) return;
+
+        // Obtain the current number.
+        const curr_number = $(parent_shifts).find('tr').length;
+
+        // Add the remaining days.
+        for (let next_number = curr_number; next_number < members.length; next_number++) {
+            // The text for each cell.
+            let cell_text = ''
+            // Add the remaining days.
+            for (let day = 0; day < tasks.length; day++) {
+                cell_text += `
+                    <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                        <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                            <div class="c-checkbox has-success">
+                                <input ${ tasks[day]['content']['qualified_members'].includes(members[next_number]['user_id']) ? "checked" : "" }  name="incompatible_team__${ tasks[day]["content"]["true_id"] }__${ members[next_number]['user_id'] }" type="checkbox" id="incompatible_tasks__${ tasks[day]["content"]["true_id"] }__${ members[next_number]['user_id'] }" class="c-check">
+                                <label style="padding: 0; display:inline-block;" for="incompatible_tasks__${ tasks[day]["content"]["true_id"] }__${ members[next_number]['user_id'] }">
+                                    <span style="display: none;" class="inc"></span>
+                                    <span class="check"></span>
+                                    <span class="box"></span>
+                                    &nbsp;&nbsp;&nbsp;
+                                </label>
+                            </div>
+                        </div>
+                    </th>
+                `
+            }
+
+            // Create a new row.
+            parent_shifts.insertAdjacentHTML(
+                'beforeend',
+                `
+                    <tr>
+                        <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${members[next_number]['username']}</th>
+                        ${cell_text}
+                    </tr>
+                `
+            );
+        }
+    }
+
+    function validateAssignmentsOptions(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+
+        }
+    }
+
+    function switchCheckBox(current_button) {
+        // Get the checked status.
+        const current_button_status = current_button.checked
+        // Remove the initial text.
+        const task_infos = current_button.id.replace('incompatible_tasks__', '').split('__')
+        // Switch the button.
+        $(`#incompatible_tasks__${task_infos[1]}__${task_infos[0]}`).prop('checked', current_button_status)
+    }
+
+    function submitAssignmentOptions(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            `assignments_options`,
+            (data, formPairs) => {
+                // Obtain the lock/unlock data.
+                const lockUnlockData = data["progress_status"];
+                // Update the status.
+                searchDataArray(lockUnlockData);
+                // obtain the current field.
+                const selected_field = $("#tasks_schedule_field");
+                // Clear the current data.
+                selected_field.empty();
+                // Add the schedule.
+                selected_field[0].insertAdjacentHTML('afterbegin',
+                    `
+                    <thead>
+                        <tr class="active">
+                            <th style="border-color: #000000; width: 10%"></th>
+                            ${data["context"]["data"]["assignments_schedule"]["content"]["crew"].map(member =>
+                                '<th style="border-color: #000000; font-size: 12px;" class="c-size-md c-center">'
+                                 + member +
+                                 '</th>'
+                            ).reduce(((previousValue, currentValue) => previousValue + '\n' + currentValue), '')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data["context"]["data"]["assignments_schedule"]["content"]["table"].map(shift_task_data =>
+                            "<tr>"
+                            +
+                            shift_task_data.map((task_data, index) =>
+                                (index !== 0)
+                                ?
+                                `
+                                <td style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                    <table class="table table-responsive" style="table-layout: fixed; margin: 0">
+                                        <tbody>
+                                `
+                                +
+                                task_data.map(task =>
+                                    '<tr style="padding: 1px">'
+                                    +
+                                    (
+                                        (task == null)
+                                        ?
+                                        ""
+                                        :
+                                        '<td style="padding: 1px; text-align: center; vertical-align: middle; border-top: 0">' + task + '</td>'
+                                    )
+                                    +
+                                    '</tr>'
+                                ).join('')
+                                +
+                                `
+                                        </tbody>
+                                    </table>
+                                </td>
+                                `
+                                :
+                                task_data.map(task =>
+                                    (
+                                        (task == null)
+                                        ?
+                                        ""
+                                        :
+                                        '<th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">' + task + '</th>'
+                                    )
+                                ).join('')
+                            ).join('')
+                            +
+                            "</tr>"
+                        ).join('')}
+                    </tbody>
+                    `
+                );
+
+                // obtain the current field.
+                const task_selected_field = $("#tasks_schedule_field_by_task");
+                // Clear the current data.
+                task_selected_field.empty();
+                // Add the schedule.
+                task_selected_field[0].insertAdjacentHTML('afterbegin',
+                    `
+                    <thead>
+                        <tr class="active">
+                            <th style="border-color: #000000; width: 10%"></th>
+                            ${data["context"]["data"]["assignments_schedule"]["content"]["tasks"].map(info =>
+                                '<th style="border-color: #000000; font-size: 12px;" class="c-size-md c-center">'
+                                 + info +
+                                 '</th>'
+                            ).reduce(((previousValue, currentValue) => previousValue + '\n' + currentValue), '')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data["context"]["data"]["assignments_schedule"]["content"]["r_table"].map(shift_task_data =>
+                            "<tr>"
+                            +
+                            shift_task_data.map((task_data, index) =>
+                                (index !== 0)
+                                ?
+                                `
+                                <td style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                    <table class="table table-responsive" style="table-layout: fixed; margin: 0">
+                                        <tbody>
+                                `
+                                +
+                                task_data.map(task =>
+                                    '<tr style="padding: 1px">'
+                                    +
+                                    (
+                                        (task == null)
+                                        ?
+                                        ""
+                                        :
+                                        '<td style="padding: 1px; text-align: center; vertical-align: middle; border-top: 0">' + task + '</td>'
+                                    )
+                                    +
+                                    '</tr>'
+                                ).join('')
+                                +
+                                `
+                                        </tbody>
+                                    </table>
+                                </td>
+                                `
+                                :
+                                task_data.map(task =>
+                                    (
+                                        (task == null)
+                                        ?
+                                        ""
+                                        :
+                                        '<th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">' + task + '</th>'
+                                    )
+                                ).join('')
+                            ).join('')
+                            +
+                            "</tr>"
+                        ).join('')}
+                    </tbody>
+                    `
+                );
+
+            }
+        );
+    }
+
+    /***************************************************************/
+    ///////////////////////// ASSIGNMENT TASKS
+    /***************************************************************/
+
+    let totalShifts = {% if data.assignments_settings.content.total_shifts %}
+        {{ data.assignments_settings.content.total_shifts }}
+    {% else %}
+        0
+    {% endif %}
+    let totalShiftsPerDay = {% if data.assignments_settings.content.daily_shifts %}
+        {{ data.assignments_settings.content.daily_shifts }}
+    {% else %}
+        0
+    {% endif %};
+
+    let totalDays = {% if data.assignments_settings.content.total_days %}
+        {{ data.assignments_settings.content.total_days }}
+    {% else %}
+        0
+    {% endif %};
+
+    function submitAssignmentTasks(event) {
+        // Get the name of the element.
+        const targetElement = event.target.id.split("_").pop();
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            `assignments_tasks_${targetElement}`,
+            (data, formPairs) => {
+                // Obtain the lock/unlock data.
+                const lockUnlockData = data["progress_status"];
+                // Update the status.
+                searchDataArray(lockUnlockData);
+                // Store the task data.
+                all_tasks = data["context"]["data"]["assignments_tasks"]
+                // Refresh the options.
+                adjustOptions()
+                // Update the task name.
+                $(`#selection__assignments_tasks_${targetElement} > a > i:first`)[0].nextSibling.nodeValue = (
+                    all_tasks[parseInt(targetElement) - 1]["content"]["name"] + " "
+                )
+            }
+        );
+    }
+
+    function validateAssignmentsTasks(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+
+        }
+    }
+
+    // Make the API call.
+    function switchTaskSection(
+        section_name,
+        onSuccess = (data) => {},
+        onError = (request, status, error) => {}
+    ) {
+        // Send the request.
+        $.ajax({
+            type: "POST",
+            url: "/api/plans/{{ plan }}/task-switch",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                data:  JSON.stringify({section: section_name})
+            },
+            dataType: "json",
+            success: function (data) {
+                onSuccess(data)
+            },
+            error: function (request, status, error) {
+                // Call the on error.
+                onError(request, status, error);
+            },
+            failure: function (data) {
+                console.log(data);
+            },
+        });
+    }
+
+    // Bind the task accordions.
+    function bindTaskAccordions() {
+        // Iterate through all types of the accordions.
+        ['sequential_settings', 'per_task_cycle_settings', 'per_person_cycle_settings'].forEach((string_prefix => {
+            // Do it for the sequential settings.
+            const seq_list = $(`div[id^="${string_prefix}__heading__for_task_"]`)
+            // Iterate through each element in the list.
+            seq_list.each(function(element_idx) {
+                // Obtain the element.
+                const element = seq_list[element_idx];
+                // Obtain the element id.
+                const element_id = element.id.replace(`${string_prefix}__heading__for_task_`, '')
+                // Trigger the on change.
+                $(element).change(function() {
+                    $(`#${string_prefix}__trigger__for_task_${element_id}`).click();
+                });
+            });
+        }));
+    }
+
+    function removeTaskFromSelector(current_button) {
+        // Obtain the button parent.
+        const button_parent = $(current_button).parent().parent()[0]
+        // Obtain the id.
+        const id = button_parent.id.replace('selection__assignments_tasks_', '')
+        // Remove the task.
+        switchTaskSection(
+            `assignments_tasks_${id}`,
+            (data) => {
+                // list root
+                const list_root = $(button_parent).parent()[0]
+                // Click another selection.
+                const lastSelector = $(button_parent).prev()[0];
+
+                var clickEvent = new MouseEvent("click", {
+                    "view": window,
+                    "bubbles": true,
+                    "cancelable": false
+                });
+
+                // Obtain the previous element of the content.
+                const curr_content = $(`#tab_assignments_tasks_${id}_content`)
+
+                // Check if element is active.
+                const active_element = $(curr_content[0]).hasClass('active')
+
+                // Obtain and delete the content.
+                button_parent.remove();
+                curr_content.remove();
+
+                // Check if last selector is main.
+                if(!active_element) {
+                    // Get the parent.
+                    const prev_element = $(list_root).find('.c-active.active')
+                    $(prev_element).find(':first-child')[0].dispatchEvent(clickEvent)
+                    setTimeout(function () {
+                      toggleEvent(prev_element);
+                    }, 10);
+                } else if (
+                    lastSelector.id === 'selection__assignments_tasks'
+                ) {
+                    // Set the id.
+                    const prev_element = $(lastSelector).prev()[0]
+                    $(prev_element).find(':first-child')[0].dispatchEvent(clickEvent)
+                    setTimeout(function () {
+                      toggleEvent(prev_element);
+                    }, 10);
+                // Otherwise.
+                } else {
+                    // Set the id.
+                    const prev_element = $(lastSelector)[0]
+                    $(prev_element).find(':first-child')[0].dispatchEvent(clickEvent)
+                    setTimeout(function () {
+                      toggleEvent(prev_element);
+                    }, 10);
+                }
+
+
+
+                // Store the task data.
+                all_tasks = data["context"]["data"]["assignments_tasks"]
+                // Refresh the options.
+                adjustOptions()
+                // Obtain the lock/unlock data.
+                const lockUnlockData = data["progress_status"];
+                // Update the status.
+                searchDataArray(lockUnlockData);
+            }
+        )
+    }
+
+    function addTaskFromSelector(
+        taskName = "",
+        taskDescription = "",
+        min_ppl = 0,
+        max_ppl = 0,
+        is_ppl_shift=false,
+        is_ppl_shift_x="",
+        is_ppl_shift_n="",
+        is_task_shift=false,
+        is_task_shift_x="",
+        is_task_shift_n="",
+        is_seq=false,
+        is_seq_diverse=true,
+        is_seq_x="",
+    ) {
+        // Get the last task selector.
+        const lastSelector = $($('#selection__assignments_options')[0]).prev()[0];
+        // The next id.
+        let nextId;
+        // Check if last selector is main.
+        if (lastSelector.id === 'selection__assignments_tasks') {
+            // Set the id.
+            nextId = 1;
+        // Otherwise.
+        } else {
+            // Set the id.
+            nextId = parseInt(lastSelector.id.replace('selection__assignments_tasks_', '')) + 1;
+        }
+
+        // Add the task.
+        switchTaskSection(
+            `assignments_tasks_${nextId}`,
+            (data) => {
+                // Obtain the user level.
+                const userLevel = {{ user_data|safe }}['level'];
+                // The name to display.
+                const name_display = (taskName !== "") ? taskName : `Tarefa ${nextId}`
+                // Insert the element.
+                lastSelector.insertAdjacentHTML(
+                    'afterend',
+                    `
+                        <li id="selection__assignments_tasks_${nextId}" onclick="toggleEvent(this)" class="">
+                            <a style="cursor: pointer;" data-toggle="tab" href="#tab_assignments_tasks_${nextId}_content" aria-expanded="false">
+                                ${ (userLevel === 'ADMIN' ||  userLevel === 'OWNER') ? '<i class="fa fa-close" onclick="removeTaskFromSelector(this)" style="color: red; margin-left: 5%;"></i>' : '<i class="fa fa-close" style="color: red; margin-left: 5%; visibility: hidden;"></i>'}${name_display}
+                                <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+                            </a>
+                        </li>
+                    `
+                )
+
+                let innerHtmlDays = ''
+                // Create the inner htmls loops.
+                for (let i = 1; i < totalDays + 1; i++) {
+                    innerHtmlDays += `<th id="day_counter" style="border-color: #000000" class="c-size-md c-center">Dia<br>${i}</th>`
+                }
+
+                let full_entries = ''
+                for (let dayShift = 1; dayShift < totalShiftsPerDay+1; dayShift++) {
+                    const htmlTurn = `<th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Turno ${dayShift}</th>`
+                    let htmlInnerTurn_full = ''
+                    for (let day = 1; day < totalDays+1; day++) {
+                        htmlInnerTurn_full += `<th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                            <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                                <div class="c-checkbox has-success">
+                                    <input checked name="task_${nextId}_valid_shift_input_${day}_${dayShift}" type="checkbox" id="task_${nextId}_valid_shift_input_${day}_${dayShift}" class="c-check">
+                                    <label style="padding: 0; display:inline-block;" for="task_${nextId}_valid_shift_input_${day}_${dayShift}">
+                                        <span style="display: none;" class="inc"></span>
+                                        <span class="check"></span>
+                                        <span class="box"></span>
+                                        &nbsp;&nbsp;&nbsp;
+                                    </label>
+                                </div>
+                            </div>
+                        </th>`
+                    }
+                    full_entries += `
+                    <tr>
+                        ${htmlTurn}
+                        ${htmlInnerTurn_full}
+                    </tr>
+                    `
+                }
+                // Insert the task data.
+                $('#tab_assignments_options_content')[0].insertAdjacentHTML(
+                    'beforebegin',
+                    `
+                        <div class="panel tab-pane" id="tab_assignments_tasks_${nextId}_content">
+                            <div class="c-content-title-1">
+                                <h3 class="c-font-uppercase c-font-bold">Tarefas</h3>
+                                <div class="c-line-left"></div>
+                            </div>
+                            <form id="form_assignments_tasks_${nextId}" class="panel panel-success tab-pane">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title" style="text-align:center;">
+                                        Função
+                                        ${ (userLevel === 'ADMIN' ||  userLevel === 'OWNER') ? `<button type="submit" id="button_assignments_tasks_${nextId}" onclick="validateAssignmentsTasks(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>` : ""}
+                                        <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+                                    </h3>
+                                </div>
+                                <fieldset disabled="disabled" class="panel-body">
+                                    <div class="c-shop-form-1">
+                                        <!-- BEGIN: ADDRESS FORM -->
+                                        <div class="">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                                    <div class="row">
+                                                        <div class="form-group col-md-3" style="margin-top: 15px; text-align:center;">
+                                                            <label for="task_number" class="control-label center">ID:</label>
+                                                        </div>
+                                                        <div class="form-group col-md-8" style="margin-top: 15px">
+                                                            <input value="Tarefa ${nextId}" name="task_number" type="text" id="task_number" disabled class="form-control c-square c-theme" placeholder="ID de tarefa">
+                                                            <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                                    <div class="row">
+                                                        <div class="form-group col-md-3" style="margin-top: 15px; text-align:center;">
+                                                            <label class="control-label center">Nome Tarefa:</label>
+                                                        </div>
+                                                        <div class="form-group col-md-8" style="margin-top: 15px">
+                                                            <input value="${taskName !== '' ? taskName : 'Tarefa ' + nextId}" name="task_name" type="text" id="task_name" class="form-control c-square c-theme" placeholder="Nome que descreve a tarefa">
+                                                            <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                                    <div class="row">
+                                                        <div class="form-group col-md-3" style="margin-top: 15px; text-align:center;">
+                                                            <label class="control-label center">Descrição:</label>
+                                                        </div>
+                                                        <div class="form-group col-md-8" style="margin-top: 15px">
+                                                            <textarea name="task_description" type="text" id="task_description" class="form-control c-square c-theme" placeholder="Descrição da tarefa">${taskDescription}</textarea>
+                                                            <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+
+                                                    <div id="shift_table_selection_row_${nextId}" class="row c-margin-t-20">
+                                                        <div class="form-group col-md-12" role="group" style="display: flex; justify-content: center;">
+                                                            <div class="c-body" style="margin: 0; padding: 0">
+                                                                <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                                                    <thead>
+                                                                        <tr id="day_counter_holder" class="active">
+                                                                            <th style="border-color: #000000; width: 20%" class="c-center">Turnos Válidos</th>
+                                                                            ${innerHtmlDays}
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="valid_shifts_body_task_${nextId}">
+                                                                        ${full_entries}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+
+                                                    <div class="row">
+                                                        <div class="form-group col-md-7" style="margin-top: 15px; text-align:center;">
+                                                            <label for="min_max_people_per_task" class="control-label center">Minimo/Maximo pessoas por tarefa num turno:</label>
+                                                        </div>
+                                                        <div class="form-group col-md-2" style="margin-top: 15px">
+                                                            <input name="task_${nextId}_min_people_present_in_each_slot" id="min_max_people_per_task" type="text" value="${min_ppl}" required class="form-control c-square c-theme" placeholder="min">
+                                                            <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                        </div>
+                                                        <div class="form-group col-md-2" style="margin-top: 15px">
+                                                            <input name="task_${nextId}_max_people_present_in_each_slot" id="min_max_people_per_task" type="text" value="${max_ppl}" required class="form-control c-square c-theme" placeholder="max">
+                                                            <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+
+                                                    <div style="margin-top: 15px" class="panel panel-default">
+                                                        <div class="panel-heading" role="tab" id="per_person_cycle_settings__heading__for_task_${nextId}">
+                                                            <div class="form-group" style="margin-top: 10px; margin-bottom: 0">
+                                                                <div class="c-checkbox-inline">
+                                                                    <div class="c-checkbox">
+                                                                        <input ${is_ppl_shift ? "checked" : ""} name="task_${nextId}_per_person_cycle_settings_switch" type="checkbox" id="task_${nextId}_per_person_cycle_settings_switch" class="c-check">
+                                                                        <label for="task_${nextId}_per_person_cycle_settings_switch">
+                                                                            <span style="display: none;" class="inc"></span>
+                                                                            <span class="check"></span>
+                                                                            <span class="box"></span>
+                                                                             <a>Opções Tripulantes/Ciclo</a>
+                                                                              <a id="per_person_cycle_settings__trigger__for_task_${nextId}" data-toggle="collapse" data-parent="#accordion-100" href="#per_person_cycle_settings__collapse__for_task_${nextId}" hidden aria-expanded="true" aria-controls="per_person_cycle_settings__collapse__for_task_${nextId}">Opções Sequenciais</a>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="per_person_cycle_settings__collapse__for_task_${nextId}" class="panel-collapse collapse ${is_ppl_shift ? "in" : ""}" role="tabpanel" aria-labelledby="per_person_cycle_settings__heading__for_task_${nextId}" style="" aria-expanded="true">
+                                                            <div class="panel-body c-font-18">
+                                                                <div class="row">
+                                                                    <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                                        <label for="task_${nextId}_per_person_cycle_settings_options_cycle" class="control-label center">Numero de turnos correspondentes a um ciclo:</label>
+                                                                    </div>
+                                                                    <div class="form-group col-md-2" style="margin-top: 15px">
+                                                                        <input name="task_${nextId}_per_person_cycle_settings_options_cycle" id="task_${nextId}_per_person_cycle_settings_options_cycle" type="text" value="${is_ppl_shift_x}" class="form-control c-square c-theme" placeholder="Total">
+                                                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                                    </div>
+                                                                    <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                                        <label for="task_${nextId}_per_person_cycle_settings_options_target" class="control-label center">Numero de turnos que cada pessoa têm que ocupar num ciclo:</label>
+                                                                    </div>
+                                                                    <div class="form-group col-md-2" style="margin-top: 15px">
+                                                                        <input name="task_${nextId}_per_person_cycle_settings_options_target" id="task_${nextId}_per_person_cycle_settings_options_target" type="text" value="${is_ppl_shift_n}" class="form-control c-square c-theme" placeholder="Objectivo">
+                                                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                                    <div style="margin-top: 15px" class="panel panel-default">
+                                                        <div class="panel-heading" role="tab" id="per_task_cycle_settings__heading__for_task_${nextId}">
+                                                            <div class="form-group" style="margin-top: 10px; margin-bottom: 0">
+                                                                <div class="c-checkbox-inline">
+                                                                    <div class="c-checkbox">
+                                                                        <input ${is_task_shift ? "checked" : ""} name="task_${nextId}_per_task_cycle_settings_switch" type="checkbox" id="task_${nextId}_per_task_cycle_settings_switch" class="c-check">
+                                                                        <label for="task_${nextId}_per_task_cycle_settings_switch">
+                                                                            <span style="display: none;" class="inc"></span>
+                                                                            <span class="check"></span>
+                                                                            <span class="box"></span>
+                                                                             <a>Opções Tarefas/Ciclo</a>
+                                                                              <a id="per_task_cycle_settings__trigger__for_task_${nextId}" data-toggle="collapse" data-parent="#accordion-100" href="#per_task_cycle_settings__collapse__for_task_${nextId}" hidden aria-expanded="true" aria-controls="per_task_cycle_settings__collapse__for_task_${nextId}">Opções Sequenciais</a>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="per_task_cycle_settings__collapse__for_task_${nextId}" class="panel-collapse collapse ${is_task_shift ? "in" : ""}" role="tabpanel" aria-labelledby="per_task_cycle_settings__heading__for_task_${nextId}" style="" aria-expanded="true">
+                                                            <div class="panel-body c-font-18">
+                                                                <div class="row">
+                                                                    <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                                        <label for="task_${nextId}_per_task_cycle_settings_options_cycle" class="control-label center">Nº de turnos correspondentes a um ciclo:</label>
+                                                                    </div>
+                                                                    <div class="form-group col-md-2" style="margin-top: 15px">
+                                                                        <input name="task_${nextId}_per_task_cycle_settings_options_cycle" id="task_${nextId}_per_task_cycle_settings_options_cycle" type="text" value="${is_task_shift_x}" class="form-control c-square c-theme" placeholder="Total">
+                                                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                                    </div>
+                                                                    <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                                        <label for="task_${nextId}_per_task_cycle_settings_options_target" class="control-label center">Nº de turnos que cada tarefa têm que ser realizada num ciclo:</label>
+                                                                    </div>
+                                                                    <div class="form-group col-md-2" style="margin-top: 15px">
+                                                                        <input name="task_${nextId}_per_task_cycle_settings_options_target" id="task_${nextId}_per_task_cycle_settings_options_target" type="text" value="${is_task_shift_n}" class="form-control c-square c-theme" placeholder="Objectivo">
+                                                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                                    <div style="margin-top: 15px" class="panel panel-default">
+                                                        <div class="panel-heading" role="tab" id="sequential_settings__heading__for_task_${nextId}">
+                                                            <div class="form-group" style="margin-top: 10px; margin-bottom: 0">
+                                                                <div class="c-checkbox-inline">
+                                                                    <div class="c-checkbox">
+                                                                        <input ${is_seq ? "checked" : ""} name="task_${ nextId }_sequential_settings_switch" type="checkbox" id="task_${ nextId }_sequential_settings_switch" class="c-check">
+                                                                        <label for="task_${ nextId }_sequential_settings_switch">
+                                                                            <span style="display: none;" class="inc"></span>
+                                                                            <span class="check"></span>
+                                                                            <span class="box"></span>
+                                                                             <a>Opções Sequenciais</a>
+                                                                              <a id="sequential_settings__trigger__for_task_${nextId}" data-toggle="collapse" data-parent="#accordion-100" href="#sequential_settings__collapse__for_task_${nextId}" hidden aria-expanded="true" aria-controls="sequential_settings__collapse__for_task_${nextId}">Opções Sequenciais</a>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="sequential_settings__collapse__for_task_${nextId}" class="panel-collapse collapse ${is_seq ? "in" : ""}" role="tabpanel" aria-labelledby="sequential_settings__heading__for_task_${nextId}" style="" aria-expanded="true">
+                                                            <div class="panel-body c-font-18">
+                                                                <div class="row">
+                                                                    <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                                        <label for="path_0" class="control-label center">Diversificar turnos</label>
+                                                                    </div>
+                                                                    <div class="form-group col-md-2" style="margin-top: 10px; margin-bottom: 0">
+                                                                        <div class="c-checkbox-inline">
+                                                                            <div class="c-checkbox ">
+                                                                                <input ${is_seq_diverse ? "checked" : ""} name="task_${nextId}_diversify_cast_switch" type="checkbox" id="task_${nextId}_diversify_cast_switch" class="c-check">
+                                                                                <label for="task_${nextId}_diversify_cast_switch">
+                                                                                    <span style="display: none;" class="inc"></span>
+                                                                                    <span class="check"></span>
+                                                                                    <span class="box"></span>
+                                                                                     Diversificar
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group col-md-9" style="margin-top: 15px; text-align:center;">
+                                                                        <label for="task_${ nextId }_sequential_settings_total_shifts" class="control-label center">Nº de turnos que cada pessoa têm que realizar em sequencia:</label>
+                                                                    </div>
+                                                                    <div class="form-group col-md-2" style="margin-top: 15px">
+                                                                        <input name="task_${ nextId }_sequential_settings_total_shifts" id="task_${ nextId }_sequential_settings_total_shifts" type="text" value="${is_seq_x}" class="form-control c-square c-theme" placeholder="Objectivo">
+                                                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- END: ADDRESS FORM -->
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                    `
+                )
+                $("form[id^=form_assignments_tasks]").submit(submitAssignmentTasks);
+                // Store the task data.
+                all_tasks = data["context"]["data"]["assignments_tasks"]
+                // Refresh the options.
+                adjustOptions()
+                // Obtain the lock/unlock data.
+                const lockUnlockData = data["progress_status"];
+                // Update the status.
+                searchDataArray(lockUnlockData);
+                // Sync the accordions.
+                bindTaskAccordions();
+                // Close the modal.
+                $('#task_import_modal').modal('hide');
+            }
+        )
+    }
+
+    /***************************************************************/
+    ///////////////////////// ASSIGNMENT SETTINGS
+    /***************************************************************/
+
+    function submitAssignmentSettings(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            'assignments_settings',
+            (data, formPairs) => {
+                // Set the values.
+                totalDays = parseInt(formPairs["assignments_total_days"])
+                totalShiftsPerDay = parseInt(formPairs["assignments_turns_per_day"])
+                totalShifts = Math.floor(totalDays * totalShiftsPerDay)
+
+                // Obtain the lock/unlock data.
+                const lockUnlockData = data["progress_status"];
+                // Update the status.
+                searchDataArray(lockUnlockData);
+                // Obtain the max days.
+                const max_days = formPairs["assignments_total_days"];
+                // The max shifts per day.
+                const max_shifts_per_day = formPairs["assignments_turns_per_day"];
+                // Reload the shift information.
+                $('div[id^="shift_table_selection_row_"]').each(function (index) {
+                    // Variable to contain the last day.
+                    let parent_days = $(this).find("#day_counter_holder")[0];
+                    // The final index.
+                    let final_day_index = 0;
+                    // To delete.
+                    const to_delete = [];
+                    // Iterate through the days.
+                    const all_days = $(parent_days).find(".c-size-md");
+                    // Iterate through all days.
+                    all_days.each(function(index_2) {
+                        // Check if the current index is larger than the final day index.
+                        if (index_2 >= max_days) {
+                            // Add it to the to delete dictionary.
+                            to_delete.push($(this));
+                        }
+                        // Update the final index.
+                        final_day_index = index_2;
+                    })
+                    // Check if the final index has not been exceeded.
+                    if (final_day_index < max_days) {
+                        // Add the remaining days.
+                        for (let i = final_day_index + 1; i < max_days; i++) {
+                            // Add the next element.
+                            parent_days.insertAdjacentHTML(
+                                'beforeend',
+                                '<th id="day_counter" style="border-color: #000000" class="c-size-md c-center">Dia<br>' + (i+1) + '</th>'
+                            );
+                        }
+                    // Otherwise.
+                    } else {
+                        // Delete all extra days.
+                        to_delete.forEach((elem => elem.remove()));
+                    }
+
+                    // Variable to contain the last day.
+                    const parent_shifts = $(this).find('tbody[id^="valid_shifts_body_task_"]')[0];
+                    // Obtain all rows.
+                    const all_rows = $(parent_shifts).find("tr");
+
+                    // The rows to delete.
+                    const rows_to_delete = [];
+
+                    // Iterate through all days.
+                    all_rows.each(function(row_index) {
+                        // Obtain the current row.
+                        const curr_row = $(this)[0];
+                        // Check if this index is larger than wanted.
+                        if (row_index >= max_shifts_per_day) {
+                            // Add it to the to delete backlog.
+                            rows_to_delete.push(curr_row);
+                            // Skip this element.
+                            return;
+                        }
+                        // The final index.
+                        let final_shift_index = 0;
+                        // To delete.
+                        const shifts_to_delete = [];
+                        // Iterate through the days.
+                        const all_checks = $(this).find(".c-check");
+                        // Iterate through all days.
+                        all_checks.each(function(index_3) {
+                            // Check if the current index is larger than the final day index.
+                            if (index_3 >= max_days) {
+                                // Add it to the to delete dictionary.
+                                shifts_to_delete.push(
+                                    $(this).closest('th')
+                                );
+                            }
+                            // Update the final index.
+                            final_shift_index = index_3;
+                        })
+                        // Check if the final index has not been exceeded.
+                        if (final_shift_index < max_days) {
+                            // Add the remaining days.
+                            for (let i = final_shift_index + 1; i < max_days; i++) {
+                                // Add the next element.
+                                curr_row.insertAdjacentHTML(
+                                    'beforeend',
+                                    `
+                                        <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                            <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                                                <div class="c-checkbox">
+                                                    <input checked name="valid_shift_input_${i+1}_${row_index+1}" type="checkbox" id="valid_shift_input_${i+1}_${row_index+1}" class="c-check">
+                                                    <label style="padding: 0; display:inline-block;" for="valid_shift_input_${i+1}_${row_index+1}">
+                                                        <span style="display: none;" class="inc"></span>
+                                                        <span class="check"></span>
+                                                        <span class="box"></span>
+                                                        &nbsp;&nbsp;&nbsp;
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </th>
+                                    `
+                                );
+                            }
+                        // Otherwise.
+                        } else {
+                            // Delete all extra days.
+                            shifts_to_delete.forEach((elem => elem.remove()));
+                        }
+                    });
+
+                    // Delete all extra rows.
+                    rows_to_delete.forEach((elem => elem.remove()));
+
+                    // Check if there are any rows to delete.
+                    if (rows_to_delete.length !== 0) return;
+
+                    // Obtain the current number.
+                    const curr_number = $(parent_shifts).find('tr').length;
+
+                    // Add the remaining days.
+                    for (let next_number = curr_number + 1; next_number <= max_shifts_per_day; next_number++) {
+                        // The text for each cell.
+                        let cell_text = ''
+                        // Add the remaining days.
+                        for (let day = 1; day <= max_days; day++) {
+                            cell_text += `
+                                <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                    <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                                        <div class="c-checkbox">
+                                            <input checked name="valid_shift_input_${day}_${next_number}" type="checkbox" id="valid_shift_input_${day}_${next_number}" class="c-check">
+                                            <label style="padding: 0; display:inline-block;" for="valid_shift_input_${day}_${next_number}">
+                                                <span style="display: none;" class="inc"></span>
+                                                <span class="check"></span>
+                                                <span class="box"></span>
+                                                &nbsp;&nbsp;&nbsp;
+                                            </label>
+                                        </div>
+                                    </div>
+                                </th>
+                            `
+                        }
+
+                        // Create a new row.
+                        parent_shifts.insertAdjacentHTML(
+                            'beforeend',
+                            `
+                                <tr>
+                                    <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Turno ${ next_number }</th>
+                                    ${cell_text}
+                                </tr>
+                            `
+                        );
+                    }
+                });
+            }
+        );
+    }
+
+    function validateAssignmentsSettings(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+            validateTotalShifts($('#assignments_total_days')[0]);
+            validateShiftsPerDay($('#assignments_turns_per_day')[0]);
+        }
+    }
+
+    function validateTotalShifts(elem) {
+        // Parse the shift total.
+        const totalShifts = parseInt(elem.value);
+        // The error text.
+        let error_text = null;
+        // Check of errors.
+        if (
+            !(!isNaN(totalShifts) && isFinite(totalShifts) && totalShifts > 0)
+        ) {
+            // Update the error text.
+            error_text = "Numero invalido, insira um numero maior que 0."
+        }
+        // Display the error.
+        if (error_text !== null) {
+            elem.setCustomValidity('Please fix errors');
+            $(elem.parentNode).addClass('has-error');
+            $(elem.parentNode).children("#error_help_text").text(error_text)
+            $(elem.parentNode).children("#error_help_text").show();
+        } else {
+            elem.setCustomValidity('');
+            $(elem.parentNode).removeClass('has-error');
+            $(elem.parentNode).children("#error_help_text").hide();
+        }
+    }
+
+    function validateShiftsPerDay(elem) {
+        // Parse the shift total.
+        const shiftsPerDay = parseInt(elem.value);
+        // The error text.
+        let error_text = null;
+        // Check of errors.
+        if (
+            !(!isNaN(shiftsPerDay) && isFinite(shiftsPerDay) && shiftsPerDay > 0)
+        ) {
+            // Update the error text.
+            error_text = "Numero invalido, insira um numero maior que 0."
+        }
+        // Display the error.
+        if (error_text !== null) {
+            elem.setCustomValidity('Please fix errors');
+            $(elem.parentNode).addClass('has-error');
+            $(elem.parentNode).children("#error_help_text").text(error_text)
+            $(elem.parentNode).children("#error_help_text").show();
+        } else {
+            elem.setCustomValidity('');
+            $(elem.parentNode).removeClass('has-error');
+            $(elem.parentNode).children("#error_help_text").hide();
+        }
+    }
+
+    function submitAssignmentSchedule(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            `assignments_schedule`,
+            (data, formPairs) => {
+                // Obtain the lock/unlock data.
+                const lockUnlockData = data["progress_status"];
+                // Update the status.
+                searchDataArray(lockUnlockData);
+            }
+        );
+    }
+
+    function validateAssignmentsSchedule(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+
+        }
+    }
+
+</script>

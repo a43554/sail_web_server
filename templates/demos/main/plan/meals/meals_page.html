@@ -1,0 +1,306 @@
+{% extends "../../headers/header_page.html" %}
+
+{% block content %}
+    <style>
+        .mark-checkbox-container {
+          display: flex;
+          justify-content: center;
+        }
+
+        .mark-checkbox-input {
+          display: none;
+        }
+
+        .mark-checkbox-label {
+            transition: .25s ease;
+            display: flex;
+            font-size: 40px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            vertical-align: middle;
+            content: "";
+            color: white;
+            background-color: red;
+            width: 400px;
+            height: 100px;
+            margin: 0;
+        }
+
+        .mark-checkbox-label:before {
+          content: "✚";
+        }
+        .mark-checkbox-input:checked ~ .mark-checkbox-label:before {
+          content: "✓";
+        }
+
+        .mark-checkbox-input:checked ~ .mark-checkbox-label:hover:before {
+          content: "⨯";
+        }
+
+        .mark-checkbox-input:checked + .mark-checkbox-label:hover {
+            background-color: red;
+        }
+
+        .mark-checkbox-input:not(:checked) ~ .mark-checkbox-label {
+          background-color: orange;
+        }
+
+        .mark-checkbox-input:checked ~ .mark-checkbox-label {
+          background-color: green;
+        }
+
+        .col-sm-half-1 {
+            width: 6%;
+        }
+        .col-md-other-half-1 {
+            width: 96.0%;
+        }
+
+        input.read-more-state {
+          display: none;
+        }
+        label.read-more-target {
+          font-size: 0;
+          max-height: 0;
+          opacity: 0;
+          display: none;
+        }
+        label.read-more-default {
+          font-size: inherit;
+          max-height: 999em;
+          opacity: 1;
+          display: inline-block;
+        }
+        input.read-more-state:checked ~ div.read-more-wrap label.read-more-target {
+          font-size: inherit;
+          max-height: 999em;
+          opacity: 1;
+          display: inline-block;
+        }
+        input.read-more-state:checked ~ div.read-more-wrap label.read-more-default {
+          font-size: 0;
+          max-height: 0;
+          opacity: 0;
+          display: none;
+        }
+        label.read-more-target {
+          cursor: pointer;
+          display: inline-block;
+        }
+        label.read-more-default {
+          cursor: pointer;
+          display: inline-block;
+        }
+    </style>
+    <script src="/static/assets/plugins/jquery.min.js" type="text/javascript"></script>
+    <script>
+    function elementFilterFunction() {
+        // Declare variables
+        var input, filter, element_root, tr, td, i, txtValue;
+        input = document.getElementById("search_input_filter");
+        filter = input.value.toUpperCase();
+        element_root = document.getElementById("item_list_container");
+        tr = element_root.getElementsByClassName("row c-cart-table-row");
+
+        const selected_option = Array.from(
+            document.getElementById("selection_input_filter").getElementsByTagName("input")
+        ).find(r => r.checked).value;
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+            // Check if a title match exists.
+            const h3 = tr[i].getElementsByTagName("h3")[0];
+            const title_match = (h3.textContent || h3.innerText).toUpperCase().indexOf(filter) > -1;
+            // Check the selection.
+            const checkbox_value = tr[i].getElementsByClassName("mark-checkbox-input")[0].checked;
+            // Check if a match exists.
+            const p = tr[i].getElementsByTagName("p")[0];
+            const body_match = (p.textContent || p.innerText).toUpperCase().indexOf(filter) > -1;
+
+            if (
+                (title_match || body_match) &&
+                !(checkbox_value && (selected_option === "not_selected")) &&
+                !(!checkbox_value && (selected_option === "selected"))
+            ) {
+                tr[i].style.display = "flex";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+    </script>
+    <div class="c-content-box c-size-md c-bg-white">
+        <div class="container">
+            <div class="c-content-panel">
+                <div class="c-content-tab-1 c-theme c-margin-t-30">
+                    <div class="clearfix">
+                        <ul class="nav nav-tabs c-font-sbold pull-left" style="width: 100%">
+                            <li class="active"><a href="#tab_2_1_content" data-toggle="tab" class="c-border-red">Editar Menus</a></li>
+{#                            <li><a href="#tab_2_2_content" data-toggle="tab" class="c-border-red">Opções</a></li>#}
+                            <li style="float: right;"><a href="#tab_2_2_content" data-toggle="tab" class="c-border-red c-font-red" style="font-weight: 600;">Quantias</a></li>
+                            <li style="float: right;"><a href="#tab_2_2_content" data-toggle="tab" class="c-border-red c-font-red" style="font-weight: 600;">Esquema</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-content c-bordered c-padding-lg">
+                        <div class="tab-pane active" id="tab_2_1_content">
+                            <div class="c-body" style="margin: 0; padding: 0">
+		                        <div id="item_list_container" class="c-shop-cart-page-1">
+                                    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 2%">
+                                        <input style="flex-grow:1" id="search_input_filter" type="text" class="form-control c-square c-theme input-lg" placeholder="Enter keywords or item number" onkeyup="elementFilterFunction()">
+                                        <form id="selection_input_filter" class="form-group row-md-6" style="margin: 0; display: flex; width: 100%; justify-content: center; align-items: center;" onchange="elementFilterFunction()">
+                                            <label class="radio-inline">
+                                              <input name="radio" type="radio" id="inlineRadioOptions1" value="all" checked="checked" style="margin-top: 0; vertical-align: middle; height: 100%"> Todos
+                                            </label>
+                                            <label class="radio-inline">
+                                              <input name="radio" type="radio" id="inlineRadioOptions2" value="selected" style="margin-top: 0; vertical-align: middle; height: 100%"> Selecionados
+                                            </label>
+                                            <label class="radio-inline">
+                                              <input name="radio" type="radio" id="inlineRadioOptions3" value="not_selected" style="margin-top: 0; vertical-align: middle; height: 100%"> Não Selecionados
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <!-- END: SHOPPING CART ITEM ROW -->
+                                    {% for dish in nutrition_data.all_menus %}
+                                        <div class="row c-cart-table-row" style="display: flex; align-items: stretch;">
+                                            <div class="mark-checkbox-container" style="width: 10%">
+                                                <input {% if dish.selected %} checked="checked" {% endif %} type="checkbox" id="_checkbox_{{ forloop.counter }}" class="mark-checkbox-input"/>
+                                                <label class="mark-checkbox-label c-size-md c-center" style="height:100%; width:100%;" for="_checkbox_{{ forloop.counter }}"></label>
+                                            </div>
+                                            <div class="c-cart-desc" style="padding-left:2%; margin-right:0;">
+                                                <h3><a href="shop-product-details-2.html" class="c-font-bold c-theme-link c-font-22 c-font-dark">{{ dish.name }}</a></h3>
+                                                <p class="read-more-default" for="read-more-controller-{{ forloop.counter }}">{{ dish.description.short }}</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    <!-- BEGIN: SHOPPING CART ITEM ROW -->
+{#                                    <div class="row c-cart-table-row">#}
+{#                                        <h2 class="c-font-uppercase c-font-bold c-theme-bg c-font-white c-cart-item-title">Item 2</h2>#}
+{#                                        <div class="col-md-2 col-sm-3 col-xs-5 c-cart-image">#}
+{#                                            <img src="/static/assets/base/img/content/shop2/12.jpg"/>#}
+{#                                        </div>#}
+{#                                        <div class="col-md-4 col-sm-9 col-xs-7 c-cart-desc">#}
+{#                                            <h3><a href="shop-product-details.html" class="c-font-bold c-theme-link c-font-22 c-font-dark">Comfortable Sports Wear Set</a></h3>#}
+{#                                            <p>Color: Grey</p>#}
+{#                                            <p>Size: S</p>#}
+{#                                        </div>#}
+{#                                        <div class="col-md-1 col-sm-3 col-xs-6 c-cart-ref">#}
+{#                                            <p class="c-cart-sub-title c-theme-font c-font-uppercase c-font-bold">SKU</p>#}
+{#                                            <p>160815</p>#}
+{#                                        </div>#}
+{#                                        <div class="col-md-1 col-sm-3 col-xs-6 c-cart-qty">#}
+{#                                            <p class="c-cart-sub-title c-theme-font c-font-uppercase c-font-bold">QTY</p>#}
+{#                                            <div class="c-input-group c-spinner">#}
+{#                                                <input type="text" class="form-control c-item-2" value="1">#}
+{#                                                <div class="c-input-group-btn-vertical">#}
+{#                                                    <button class="btn btn-default" type="button" data_input="c-item-2" data-maximum="10"><i class="fa fa-caret-up"></i></button>#}
+{#                                                    <button class="btn btn-default" type="button" data_input="c-item-2"><i class="fa fa-caret-down"></i></button>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                        <div class="col-md-2 col-sm-3 col-xs-6 c-cart-price">#}
+{#                                            <p class="c-cart-sub-title c-theme-font c-font-uppercase c-font-bold">Unit Price</p>#}
+{#                                            <p class="c-cart-price c-font-bold">$99.00</p>#}
+{#                                        </div>#}
+{#                                        <div class="col-md-1 col-sm-3 col-xs-6 c-cart-total">#}
+{#                                            <p class="c-cart-sub-title c-theme-font c-font-uppercase c-font-bold">Total</p>#}
+{#                                            <p class="c-cart-price c-font-bold">$99.00</p>#}
+{#                                        </div>#}
+{#                                        <div class="col-md-1 col-sm-12 c-cart-remove">#}
+{#                                            <a href="#" class="c-theme-link c-cart-remove-desktop">×</a>#}
+{#                                            <a href="#" class="c-cart-remove-mobile btn c-btn c-btn-md c-btn-square c-btn-red c-btn-border-1x c-font-uppercase">Remove item from Cart</a>#}
+{#                                        </div>#}
+{#                                    </div>#}
+                                    <!-- END: SHOPPING CART ITEM ROW -->
+                                    <!-- BEGIN: SUBTOTAL ITEM ROW -->
+{#                                    <div class="row">#}
+{#                                        <div class="c-cart-subtotal-row c-margin-t-20">#}
+{#                                            <div class="col-md-2 col-md-offset-9 col-sm-6 col-xs-6 c-cart-subtotal-border">#}
+{#                                                <h3 class="c-font-uppercase c-font-bold c-right c-font-16 c-font-grey-2">Subtotal</h3>#}
+{#                                            </div>#}
+{#                                            <div class="col-md-1 col-sm-6 col-xs-6 c-cart-subtotal-border">#}
+{#                                                <h3 class="c-font-bold c-font-16">$246.00</h3>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+                                    <!-- END: SUBTOTAL ITEM ROW -->
+                                    <!-- BEGIN: SUBTOTAL ITEM ROW -->
+{#                                    <div class="row">#}
+{#                                        <div class="c-cart-subtotal-row">#}
+{#                                            <div class="col-md-2 col-md-offset-9 col-sm-6 col-xs-6 c-cart-subtotal-border">#}
+{#                                                <h3 class="c-font-uppercase c-font-bold c-right c-font-16 c-font-grey-2">Shipping Fee</h3>#}
+{#                                            </div>#}
+{#                                            <div class="col-md-1 col-sm-6 col-xs-6 c-cart-subtotal-border">#}
+{#                                                <h3 class="c-font-bold c-font-16">$15.00</h3>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+                                    <!-- END: SUBTOTAL ITEM ROW -->
+                                    <!-- BEGIN: SUBTOTAL ITEM ROW -->
+{#                                    <div class="row">#}
+{#                                        <div class="c-cart-subtotal-row">#}
+{#                                            <div class="col-md-2 col-md-offset-9 col-sm-6 col-xs-6 c-cart-subtotal-border">#}
+{#                                                <h3 class="c-font-uppercase c-font-bold c-right c-font-16 c-font-grey-2">Grand Total</h3>#}
+{#                                            </div>#}
+{#                                            <div class="col-md-1 col-sm-6 col-xs-6 c-cart-subtotal-border">#}
+{#                                                <h3 class="c-font-bold c-font-16">$261.00</h3>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+                                    <!-- END: SUBTOTAL ITEM ROW -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab_2_2_content">
+                            <div class="c-body" style="margin: 0; padding: 0">
+                                <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                    <thead>
+                                    <tr class="active">
+                                        <th style="border-color: #000000; width: 10%"></th>
+                                        {% for person in schedule_data.crew %}
+                                            <th style="border-color: #000000" class="c-size-md c-center">{{ person }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for shift_data in schedule_data.shifts_by_crew %}
+                                        <tr>
+                                            {% for person_data in shift_data %}
+                                                {% if forloop.counter0 != 0 %}
+                                                    <td style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                                    <table class="table table-responsive" style="table-layout: fixed; margin: 0">
+                                                        <tbody>
+                                                            {% for task in person_data %}
+                                                                {% if task != null %}
+                                                                   <tr>
+                                                                       <td style="text-align: center; vertical-align: middle; border-top: 0">{{ task }}</td>
+                                                                   </tr>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                                {% else %}
+                                                     {% for person in person_data %}
+                                                        {% if person != null %}
+                                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ person }}</th>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="c-body" style="height: auto; margin:0%; display:inline-block; overflow: auto; white-space: nowrap; width: 100%;">
+{#                        <a href="#" class="btn c-btn btn-lg c-btn-red c-btn-square c-font-white c-font-bold c-font-uppercase c-cart-float-l" style="float: left; ">Continue Shopping</a>#}
+                        <a href="#" class="btn c-btn btn-lg c-theme-btn c-btn-square c-font-white c-font-bold c-font-uppercase c-cart-float-r" style="float: right;">Pre-Visualizar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,86 @@
+<div class="panel tab-pane" id="tab_meals_schedule_content">
+    <div class="c-content-title-1">
+        <h3 class="c-font-uppercase c-font-bold">Ementa</h3>
+        <div class="c-line-left"></div>
+    </div>
+    <form id="form_meals_schedule" class="panel panel-success tab-pane">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center;">
+                Plano de Tarefas
+                {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                    <button id="button_meals_schedule" type="submit" onclick="validateMealsSchedule(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>
+                {% endif %}
+                <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+            </h3>
+        </div>
+        <fieldset disabled="disabled" class="panel-body">
+            <div class="c-shop-form-1">
+                <!-- BEGIN: ADDRESS FORM -->
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="c-body" style="margin: 0; padding: 0">
+                                <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                    <thead>
+                                        <tr class="active">
+                                            <th style="border-color: #000000; width: 10%"></th>
+                                            <th style="border-color: #000000" class="c-size-md c-center">Ementa</th>
+                                            <th style="border-color: #000000" class="c-size-md c-center">Ingredientes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="meals_table_information">
+                                        {% for dish in data.meals_schedule.content.schedule %}
+                                            <tr>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Refeição {{ forloop.counter }}</th>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ dish.name }}</th>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{% for ingredient in dish.ingredients %} {{ ingredient }}<br/> {% endfor %}</th>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr class="active">
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Total</th>
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{% for dish in data.meals_schedule.content.total.dishes %} {{ dish }}<br/> {% endfor %}</th>
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{% for ingredient in data.meals_schedule.content.total.ingredients %} {{ ingredient }}<br/> {% endfor %}</th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                    <thead>
+                                        <tr class="active">
+                                            <th style="border-color: #000000;" class="c-size-md c-center">Nome</th>
+                                            <th style="border-color: #000000; width: 10%;" class="c-size-md c-center">Peso</th>
+                                            <th style="border-color: #000000; width: 10%;" class="c-size-md c-center">Preço</th>
+                                            <th style="border-color: #000000; width: 10%;" class="c-size-md c-center">Quantia</th>
+                                            <th style="border-color: #000000;" class="c-size-md c-center">Peso Total</th>
+                                            <th style="border-color: #000000;" class="c-size-md c-center">Preço Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="products_table_information">
+                                        {% for product in data.meals_schedule.content.products %}
+                                            <tr>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ product.name }}</th>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ product.weight }}g</th>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ product.price }}€</th>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">x{{ product.amount }}</th>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ product.total_weight }}g</th>
+                                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ product.total_price }}€</th>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr class="active">
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Total</th>
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">-</th>
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">-</th>
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">-</th>
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ data.meals_schedule.content.total.products.weight }}g</th>
+                                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ data.meals_schedule.content.total.products.price }}€</th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: ADDRESS FORM -->
+            </div>
+        </fieldset>
+    </form>
+</div>

@@ -1,0 +1,161 @@
+<script>
+
+    /***************************************************************/
+    ///////////////////////// GENERAL INFO
+    /***************************************************************/
+
+    function submitGeneralInfo(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(event, 'general_info');
+    }
+
+    function validateGeneralInfo(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+            validateGeneralName($('#general_info_plan_name')[0], 200, 3);
+            validateGeneralName($('#general_info_plan_description')[0], 500);
+        }
+    }
+
+    function validateGeneralName(elem, maxLength, minLength = 0) {
+        // Empty error text.
+        let error_text = null;
+        // Text length.
+        const textLength = elem.value.length;
+        // Must have length 3.
+        if (textLength > maxLength) {
+            // Update the error text.
+            error_text = "Não pode conter mais de " + maxLength + "carateres.";
+        // Must have length 3.
+        } else if (textLength < minLength) {
+            // Update the error text.
+            error_text = "Não pode conter menos de " + minLength + "carateres.";
+        }
+        // Display the error.
+        if (error_text !== null) {
+            elem.setCustomValidity('Please fix errors');
+            $(elem.parentNode.parentNode).addClass('has-error');
+            $(elem.parentNode.parentNode).children("#error_help_text").text(error_text)
+            $(elem.parentNode.parentNode).children("#error_help_text").show();
+        } else {
+            elem.setCustomValidity('');
+            $(elem.parentNode.parentNode).removeClass('has-error');
+            $(elem.parentNode.parentNode).children("#error_help_text").hide();
+        }
+    }
+
+    /***************************************************************/
+    ///////////////////////// GENERAL INFO
+    /***************************************************************/
+
+    function submitGeneralTeam(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            'general_team',
+            (data) => {
+                // Store the task data.
+                all_tasks = data["context"]["data"]["assignments_tasks"]
+                // Store the task data.
+                all_people = data["context"]["data"]["general_team"]['content']
+
+                const parentRoot = $('#form_general_team')
+                parentRoot.find('.glyphicon-remove').css('pointer-events', 'none');
+                parentRoot.find('.c-btn-grey-2').css('pointer-events', 'none');
+                // Refresh the options.
+                adjustOptions()
+            },
+            (request, status, error) => {
+                // Check if the error is of type 400.
+                if (error === "Bad Request") {
+                    // The json content.
+                    const data = JSON.parse(request.responseText);
+                    // Obtain the errors.
+                    const errors = data['errors']
+                    // Check each error section.
+                    Object.keys(errors).forEach(function(key) {
+                        // Obtain the error value.
+                        const error = errors[key]['error'];
+                        // Obtain the element.
+                        const elem = $("#form-general-team").find(`[name="userid_${key}"]`)[0];
+                        // Check if error is not none.
+                        if (error !== null) {
+                            $(elem.parentNode).addClass('has-error');
+                            $(elem.parentNode).children("#error_help_text").text(error);
+                            $(elem.parentNode.parentNode).children("#error_help_text").show();
+                        } else {
+                            $(elem.parentNode).removeClass('has-error');
+                            $(elem.parentNode).children("#error_help_text").hide();
+                        }
+                    })
+                }
+            },
+            (data) => {
+                const parentRoot = $('#form_general_team')
+                parentRoot.find('.glyphicon-remove').css('pointer-events', 'auto');
+                parentRoot.find('.c-btn-grey-2').css('pointer-events', 'auto');
+            }
+        );
+    }
+
+    function validateGeneralTeam(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+
+        }
+    }
+
+   function removeUserEvent(element) {
+        // Get the parent.
+        const elementParent = element.parentNode.parentElement;
+        elementParent.previousElementSibling.remove()
+        elementParent.remove()
+    }
+
+    function addUserEvent(element) {
+        // Get the id.
+        const element_id = parseInt(element.id.split('_')[1]) + 1;
+        // Update the current id.
+        element.setAttribute("id", "add-user_" + element_id);
+        // Get the parent.
+        const elementParent = element.parentNode;
+        // Add Another user.
+        elementParent.insertAdjacentHTML('beforebegin', `
+            <div class="row">
+                <div class="form-group col-md-2" style="margin-top: 15px; text-align:center;">
+                    <label class="control-label center">Tripulante:</label>
+                </div>
+                <div class="form-group col-md-7" style="margin-top: 15px">
+                    <input name="userid_${element_id}" type="text" id="userid_${element_id}" class="form-control c-square c-theme" placeholder="ID">
+                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                </div>
+                <div class="form-group col-md-2" style="margin-top: 10px; margin-bottom: 0">
+                    <div class="c-checkbox-inline">
+                        <div class="c-checkbox">
+                            <input name="useradmin_${element_id}" type="checkbox" id="useradmin_${element_id}" class="c-check">
+                            <label for="useradmin_${element_id}">
+                                <span style="display: none;" class="inc"></span>
+                                <span class="check"></span>
+                                <span class="box"></span>
+                                Admin
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-md-1" style="margin-top: 18px; text-align:left; height: 100%;">
+                    <label onclick="removeUserEvent(this)" class="glyphicon glyphicon-remove control-label" style="cursor: pointer; padding-right:0"></label>
+                </div>
+            </div>
+            <div class="c-content-divider c-bg-dark-1" style="margin:0; top:100%; "></div>
+        `)
+    }
+
+</script>

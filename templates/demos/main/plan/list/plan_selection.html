@@ -1,0 +1,128 @@
+{% extends "../../headers/header_page.html" %}
+
+{% block content %}
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template: auto / auto auto auto auto;
+            grid-gap: 20px;
+        }
+        .grid-container > div {
+            text-align: center;
+            width: 262px;
+            {#padding: 20px 20px;#}
+            font-size: 30px;
+        }
+    </style>
+
+    {% include "./scripts_plan_selection.html" %}
+
+    <div class="c-layout-breadcrumbs-1 c-subtitle c-fonts-uppercase c-fonts-bold c-bordered c-bordered-both">
+        <div class="container">
+            <!-- LEFT SIDED INFORMATION -->
+            <div class="c-page-title c-pull-left">
+                <h3 class="c-font-uppercase c-font-sbold">Lista de Planos de Viagem</h3>
+                <h4 class="">Selecionar planos para editar ou visualizar</h4>
+            </div>
+            <!-- RIGHT SIDED -->
+            <ul class="c-page-breadcrumbs c-theme-nav c-pull-right c-fonts-regular">
+                <li><a href="/plans/">Planos</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="c-content-box c-size-md">
+        <div class="container">
+            <div id="plan_filters" class="cbp-l-filters-button" style="justify-content: center; align-items: center; margin-bottom: 2%">
+                <input id="plan_search_input_filter" type="text"class="col-md-12 form-control c-square c-theme input-lg" placeholder="Procurar plano por título ou descrição" onkeyup="planFilterFunction()"/>
+                <input id="crew_size_search_input_filter" type="number" style="width: calc(100% / 3)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Tamanho da tripulação" onkeyup="planFilterFunction()"/>
+                <input id="meals_search_input_filter" type="number" style="width: calc(100% / 3)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Número de refeições" onkeyup="planFilterFunction()"/>
+                <input id="shifts_search_input_filter" type="number" style="width: calc(100% / 3)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Número de turnos" onkeyup="planFilterFunction()"/>
+                <div id="selection_input_filter" class="form-group col-md-12" style="margin-top: 2%; display: flex; width: 100%; justify-content: center; align-items: center;" onchange="planFilterFunction()">
+                    <label style="background-color: cornflowerblue" class="radio-inline cbp-filter-item-active cbp-filter-item">
+                        <input name="radio" type="radio" id="inlineRadioOptions1" value="all" checked="checked" style="margin-top: 0; vertical-align: middle; height: 100%; visibility: hidden;"> Todos
+                    </label>
+                    <label class="radio-inline cbp-filter-item-active cbp-filter-item">
+                      <input name="radio" type="radio" id="inlineRadioOptions2" value="mine" style="margin-top: 0; vertical-align: middle; height: 100%; visibility: hidden;"> Meus
+                    </label>
+                    <label class="radio-inline cbp-filter-item-active cbp-filter-item">
+                      <input name="radio" type="radio" id="inlineRadioOptions3" value="others" style="margin-top: 0; vertical-align: middle; height: 100%; visibility: hidden;"> Outros
+                    </label>
+                </div>
+            </div>
+            <div id="grid-container" class="cbp cbp-caption-active cbp-caption-overlayBottomReveal cbp-ready" style="margin-top: 10%; height: 100%;">
+                <div class="cbp-wrapper-outer">
+                    <div class="grid-container">
+                        <div style="background-color: cornflowerblue; margin-top: 20px; margin-bottom: 40px">
+                            <div class="graphic" style="margin-top: 20%; width: 262px; position: relative; overflow:hidden;">
+                                <div style="position: absolute; z-index:100; display: flex; justify-content: center; top: 42.5%; right: 22.5%;">
+                                    <form action="/plans/new/" method="post">
+                                        {% csrf_token %}
+                                        <button style="background-color: cornflowerblue; font-weight: bold; color: white" class="cbp-singlePage cbp-l-caption-buttonLeft btn btn-sm c-btn-square c-btn-border-1x c-btn-white c-btn-uppercase">
+                                            Novo plano
+                                        </button>
+                                    </form>
+                                </div>
+                                <div style="background-color: rgba(0,0,0,0)" class="cbp-item-wrapper">
+                                    <div class="cbp-caption">
+                                        <div class="" >
+                                            <img src="/static/assets/demos/main/home_page_image.jpg" alt="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% for plan in plans %}
+                        <div>
+                            <div class="cbp-item graphic" style="width: 262px; position: relative; overflow:hidden;">
+                                {% if plan.is_participant %}
+                                    <div style="position: absolute; z-index:100; pointer-events: none; display: flex; justify-content: flex-end; top: 4%; right: 3%; text-shadow: 0 0 10px #000000, 0 0 20px #000000, 0 0 30px #000000, 0 0 40px #0c0c0c, 0 0 50px #ff4da6">
+                                        <i class="fa fa-ticket" style="color: {% if plan.is_complete %} limegreen {% else %} yellow {% endif %};"></i>
+                                    </div>
+                                {% endif %}
+                                <div style="position: absolute; z-index:100; pointer-events: none">
+                                    <h3 id="crew_size" style="margin-left: 5%; white-space: nowrap; color: white; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                        <i class="fa fa-user" style="color: white;"></i>
+                                        {{ plan.info.team_count }}
+                                    </h3>
+                                    <h3 id="meal_size" style="margin-left: 15%; white-space: nowrap; color: white; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                        <i class="fa fa-cutlery" style="color: white;"></i>
+                                        {{ plan.info.meals_count }}
+                                    </h3>
+                                    <h3 id="shift_size" style="margin-left: 15%; white-space: nowrap; color: white; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                        <i class="fa fa-list-alt" style="color: white;"></i>
+                                        {{ plan.info.shifts_count }}
+                                    </h3>
+                                </div>
+                                <div style="background-color: cornflowerblue" class="cbp-item-wrapper">
+                                    <div class="cbp-caption">
+                                        <div class="cbp-caption-defaultWrap">
+                                            <img src="/static/assets/demos/main/sail_{{ plan.profile_image }}.png" alt="">
+                                        </div>
+                                        <form action="/plans/{{ plan.id }}/copy" method="post">
+                                            {% csrf_token %}
+                                            <div class="cbp-caption-activeWrap">
+                                                <div class="cbp-l-caption-alignCenter">
+                                                    <div class="cbp-l-caption-body">
+                                                        <a href="/plans/{{ plan.id }}/" class="cbp-singlePage cbp-l-caption-buttonLeft btn btn-sm c-btn-square c-btn-border-1x c-btn-white  c-btn-uppercase">Visualizar</a>
+                                                        {% if plan.is_complete %}
+                                                            <button class="cbp-lightbox cbp-l-caption-buttonRight btn btn-sm c-btn-square c-btn-border-1x c-btn-white  c-btn-uppercase">
+                                                                Copiar
+                                                            </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div style="color: black" class="cbp-l-grid-projects-title">{{ plan.name }}</div>
+                                    <div style="color: black" class="cbp-l-grid-projects-desc">{{ plan.description }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

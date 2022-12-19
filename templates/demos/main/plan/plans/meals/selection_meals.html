@@ -1,0 +1,38 @@
+<li class="c-sidebar-menu collapse">
+    <ul class="c-dropdown c-open" style="text-align:center; pointer-events: none; padding-left: 0">
+        <h1 style="font-size: large" href="javascript:;">Ementa</h1>
+    </ul>
+</li>
+<li id="selection__meals_settings" onclick="toggleEvent(this)" class="" {% if data.meals_settings.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_meals_settings_content" aria-expanded="true">Informação
+        {% if data.meals_settings.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.meals_settings.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>
+<li id="selection__meals_selection" onclick="toggleEvent(this)" class="" {% if data.meals_selection.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_meals_selection_content" aria-expanded="false">Seleção
+        {% if data.meals_selection.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.meals_selection.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>
+<li id="selection__meals_schedule" onclick="toggleEvent(this)" class="" {% if data.meals_schedule.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_meals_schedule_content" aria-expanded="false">Ementa
+        {% if data.meals_schedule.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.meals_schedule.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>

@@ -1,0 +1,79 @@
+<script>
+    function planFilterFunction() {
+        // The root element.
+        const element_root = $(".container")
+        // Get the string used for filtering.
+        const str_filter = element_root.find("#plan_search_input_filter").val().toUpperCase();
+        // Get the string used for filtering.
+        const crew_filter = element_root.find("#crew_size_search_input_filter").val().toUpperCase();
+        // Get the string used for filtering.
+        const meal_filter = element_root.find("#meals_search_input_filter").val().toUpperCase();
+        // Get the string used for filtering.
+        const shift_filter = element_root.find("#shifts_search_input_filter").val().toUpperCase();
+        // Get all items.
+        const tr = element_root.find(".cbp-item");
+
+        const input_elements = Array.from(
+            document
+                .getElementById("selection_input_filter")
+                .getElementsByTagName("input")
+        )
+
+        // Iterate through each element.
+        input_elements.forEach((element) => {
+            // Check if element is checked.
+            if (element.checked) {
+                // Set the element color.
+                $(element.parentNode).css('background-color', 'cornflowerblue');
+            } else {
+                // Set the element color.
+                $(element.parentNode).css('background-color', '');
+            }
+        });
+        // Get the selected option value.
+        const selected_option = input_elements.find((element) => element.checked).value;
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+            // Check if a title match exists.
+            const title = tr[i].getElementsByClassName("cbp-l-grid-projects-title")[0];
+            const title_match = (
+                title.textContent.toUpperCase().indexOf(str_filter) > -1
+                ||
+                title.innerText.toUpperCase().indexOf(str_filter) > -1
+            );
+            // Check the selection.
+            const is_participant = tr[i].getElementsByClassName("fa-ticket").length !== 0;
+            // Check if a match exists.
+            const subtitle = tr[i].getElementsByClassName("cbp-l-grid-projects-desc")[0];
+            const body_match = (
+                subtitle.textContent.toUpperCase().indexOf(str_filter) > -1
+                ||
+                subtitle.innerText.toUpperCase().indexOf(str_filter) > -1
+            );
+
+            // The crew size
+            const crew_size = $(tr[i]).find("#crew_size").text().replace(/\s/g,'');
+            const crew_match = (crew_filter === "" || crew_size === crew_filter)
+
+            // The meal size
+            const meal_size = $(tr[i]).find("#meal_size").text().replace(/\s/g,'');
+            const meal_match = (meal_filter === "" || meal_size === meal_filter)
+
+            // The task size
+            const shift_size = $(tr[i]).find("#shift_size").text().replace(/\s/g,'');
+            const shift_match = (shift_filter === "" || shift_size === shift_filter)
+
+            if (
+                (title_match || body_match) &&
+                !(is_participant && (selected_option === "others")) &&
+                !(!is_participant && (selected_option === "mine")) &&
+                crew_match && meal_match && shift_match
+            ) {
+                tr[i].parentNode.style.display = "block";
+            } else {
+                tr[i].parentNode.style.display = "none";
+            }
+        }
+    }
+</script>

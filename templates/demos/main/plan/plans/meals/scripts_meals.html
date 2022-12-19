@@ -1,0 +1,326 @@
+<script>
+
+    /***************************************************************/
+    ///////////////////////// MEALS SETTINGS
+    /***************************************************************/
+
+    function submitMealsSettings(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            'meals_settings',
+            (data) => {
+                const parentRoot = $('#form_meals_settings')
+                parentRoot.find('.glyphicon-remove').css('pointer-events', 'none');
+                parentRoot.find('.c-btn-grey-2').css('pointer-events', 'none');
+            },
+            (request, status, error) => {
+                const parentRoot = $('#form_meals_settings')
+                parentRoot.find('.glyphicon-remove').css('pointer-events', 'auto');
+                parentRoot.find('.c-btn-grey-2').css('pointer-events', 'auto');
+            },
+            (data) => {
+                const parentRoot = $('#form_meals_settings')
+                parentRoot.find('.glyphicon-remove').css('pointer-events', 'auto');
+                parentRoot.find('.c-btn-grey-2').css('pointer-events', 'auto');
+            }
+        );
+    }
+
+    function validateMealsSettings(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+
+        }
+    }
+
+    function removeMealTime(element) {
+        // Get the parent.
+        const elementParent = element.parentNode.parentElement;
+        elementParent.previousElementSibling.remove()
+        elementParent.remove()
+    }
+
+    function addMealTime(element) {
+        // Get the id.
+        const element_id = parseInt(element.id.split('_')[1]) + 1;
+        // Update the current id.
+        element.setAttribute("id", "add-meal-time_" + element_id);
+        // Get the parent.
+        const elementParent = element.parentNode;
+        // Add Another user.
+        elementParent.insertAdjacentHTML('beforebegin', `
+            <div class="row">
+                <div class="form-group col-md-1" style="margin-top: 15px; text-align:center;"></div>
+                <div class="form-group col-md-4" style="margin-top: 10px; margin-bottom: 0">
+                    <div class="c-checkbox-inline">
+                        <div class="c-checkbox has-info">
+                            <input name="meal_time_${element_id}_input_type_1" type="checkbox" id="meal_time_${element_id}_input_type_1" class="c-check">
+                            <label for="meal_time_${element_id}_input_type_1">
+                                <span style="display: none;" class="inc"></span>
+                                <span class="check"></span>
+                                <span class="box"></span>
+                                Pequeno Almoço
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-md-3" style="margin-top: 10px; margin-bottom: 0">
+                    <div class="c-checkbox-inline">
+                        <div class="c-checkbox has-info">
+                            <input name="meal_time_${element_id}_input_type_2" type="checkbox" id="meal_time_${element_id}_input_type_2" class="c-check">
+                            <label for="meal_time_${element_id}_input_type_2">
+                                <span style="display: none;" class="inc"></span>
+                                <span class="check"></span>
+                                <span class="box"></span>
+                                Almoço
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-md-3" style="margin-top: 10px; margin-bottom: 0">
+                    <div class="c-checkbox-inline">
+                        <div class="c-checkbox has-info">
+                            <input name="meal_time_${element_id}_input_type_3" type="checkbox" id="meal_time_${element_id}_input_type_3" class="c-check">
+                            <label for="meal_time_${element_id}_input_type_3">
+                                <span style="display: none;" class="inc"></span>
+                                <span class="check"></span>
+                                <span class="box"></span>
+                                Jantar
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-md-1" style="margin-top: 18px; text-align:left; height: 100%;">
+                    <label onclick="removeMealTime(this)" class="glyphicon glyphicon-remove control-label" style="pointer-events: none; cursor: pointer; padding-right:0%"></label>
+                </div>
+            </div>
+            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+        `)
+    }
+
+    /***************************************************************/
+    ///////////////////////// MEAL SELECTION
+    /***************************************************************/
+
+    function elementFilterFunction() {
+        // The root element.
+        const element_root = $("#form_meals_selection")
+        // Get the string used for filtering.
+        const str_filter = element_root.find("#search_input_filter").val().toUpperCase();
+        // Get all rows.
+        const tr = element_root.find(".c-cart-table-row");
+
+        const selected_option = Array.from(
+            document.getElementById("selection_input_filter").getElementsByTagName("input")
+        ).find(r => r.checked).value;
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+            // Check if a title match exists.
+            const h3 = tr[i].getElementsByTagName("h3")[0];
+            const title_match = (h3.textContent || h3.innerText).toUpperCase().indexOf(str_filter) > -1;
+            // Check the selection.
+            const checkbox_value = tr[i].getElementsByClassName("mark-checkbox-input")[0].checked;
+            // Check if a match exists.
+            const p = tr[i].getElementsByTagName("p")[0];
+            const body_match = (p.textContent || p.innerText).toUpperCase().indexOf(str_filter) > -1;
+
+            if (
+                (title_match || body_match) &&
+                !(checkbox_value && (selected_option === "not_selected")) &&
+                !(!checkbox_value && (selected_option === "selected"))
+            ) {
+                tr[i].style.display = "flex";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+
+
+    function submitMealsSelection(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            'meals_selection',
+            (data) => {
+                const parentRoot = $('#form_meals_selection')
+                parentRoot.find('.mark-checkbox-container').css('pointer-events', 'none');
+
+                // Obtain the schedule.
+                const schedule_data = data["context"]["data"]['meals_schedule']['content']['schedule'];
+                // Obtain the products.
+                const product_data = data["context"]["data"]['meals_schedule']['content']['products'];
+                // Obtain the total data.
+                const total_data = data["context"]["data"]['meals_schedule']['content']['total'];
+
+                // Obtain the table root.
+                const meal_table_parent = $("#meals_table_information");
+                // Clear the children.
+                meal_table_parent.empty();
+                // The complete string.
+                let meals_complete_string = ""
+
+                // Check if data exists.
+                if (schedule_data) {
+                     // Iterate through the schedule.
+                    schedule_data.forEach(function (dish, index) {
+                    // The ingredient's list.
+                    let ingredient_list = ""
+                    // Iterate through all ingredients.
+                    dish['ingredients'].forEach(function (ingredient, inner_index) {
+                        ingredient_list += `${ingredient}<br/>`
+                    });
+                    meals_complete_string += `
+                        <tr>
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Refeição ${index+1}</th>
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${dish["name"]}</th>
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${ingredient_list}</th>
+                        </tr>
+                    `
+                });
+                }
+                // The total dish list.
+                let total_dish_list = ""
+                // Check if data exists.
+                if (total_data) {
+                    // Iterate through all dishes.
+                    total_data['dishes'].forEach(function (dish, inner_index) {
+                        total_dish_list += `${dish}<br/>`
+                    });
+                }
+                // The total ingredient list.
+                let total_ingredient_list = ""
+                // Check if data exists.
+                if (total_data) {
+                    // Iterate through all ingredients.
+                    total_data['ingredients'].forEach(function (ingredient, inner_index) {
+                        total_ingredient_list += `${ingredient}<br/>`
+                    });
+                }
+                // Join the string.
+                meal_table_parent[0].insertAdjacentHTML('afterbegin', `
+                    ${meals_complete_string}
+                    <tr class="active">
+                        <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Total</th>
+                        <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${total_dish_list}</th>
+                        <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${total_ingredient_list}</th>
+                    </tr>
+                `);
+
+
+                // Obtain the table root.
+                const products_table_parent = $("#products_table_information");
+                // Clear the children.
+                products_table_parent.empty();
+                // The complete string.
+                let products_complete_string = ""
+                // Check if data exists.
+                if (product_data) {
+                     // Iterate through the products.
+                    product_data.forEach(function (product, index) {
+                        // Append it to the list.
+                        products_complete_string += `
+                            <tr>
+                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${ product["name"] }</th>
+                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${ product["weight"] }g</th>
+                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${ product["price"] }€</th>
+                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">x${ product["amount"] }</th>
+                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${ product["total_weight"] }g</th>
+                                <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${ product["total_price"] }€</th>
+                            </tr>
+                        `
+                    });
+                }
+                // Check if data exists.
+                if (total_data) {
+                    // Join the string.
+                    products_table_parent[0].insertAdjacentHTML('afterbegin', `
+                        ${products_complete_string}
+                        <tr class="active">
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">Total</th>
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">-</th>
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">-</th>
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">-</th>
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${total_data['products']["weight"]}g</th>
+                            <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">${total_data['products']["price"]}€</th>
+                        </tr>
+                    `);
+                }
+            },
+            (request, status, error) => {
+                const parentRoot = $('#form_meals_selection')
+                parentRoot.find('.mark-checkbox-container').css('pointer-events', 'auto');
+            },
+            (data) => {
+                const parentRoot = $('#form_meals_selection')
+                parentRoot.find('.mark-checkbox-container').css('pointer-events', 'auto');
+            }
+        );
+    }
+
+    function validateMealsSelection(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+
+        }
+    }
+
+    function validateMealsSchedule(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+
+        }
+    }
+
+    function submitMealsSchedule(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            `meals_schedule`,
+            (data, formPairs) => {
+                // Obtain the lock/unlock data.
+                const lockUnlockData = data["progress_status"];
+                // Update the status.
+                searchDataArray(lockUnlockData);
+            }
+        );
+    }
+
+    // Update the dish information.
+    function changeDishModal(dish) {
+        // Obtain the modal body.
+        const fullModal = $("#meal_import_modal");
+        // Change the html.
+        const modalBody = fullModal.find(".modal-body");
+        // Update the html.
+        modalBody.html(`
+            <h5><b>Nome: </b></h5><h6>${dish["name"]}</h6>
+            <br>
+            <h5><b>Descrição: </b></h5><h6>${dish["description"]["full"]}</h6>
+            <br>
+            <h5><b>Lista de ingredientes:</b></h5>
+            <h6>
+                ${dish["ingredient_data"]["ingredient_list"].map(ing =>
+                    ing["name"] + " (" + ing["amount"] + "g)"
+                ).join("<br>")}
+            </h6>
+        `)
+        // Display the modal.
+        fullModal.modal('show');
+    }
+
+</script>

@@ -1,0 +1,71 @@
+<div class="panel tab-pane" id="tab_general_team_content">
+    <div class="c-content-title-1">
+        <h3 class="c-font-uppercase c-font-bold">Geral</h3>
+        <div class="c-line-left"></div>
+    </div>
+    <form id="form_general_team" class="panel-success panel tab-pane">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center;">
+                Tripulação
+                {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                    <button id="button_general_team" type="submit" onclick="validateGeneralTeam(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>
+                {% endif %}
+                <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+            </h3>
+        </div>
+        <fieldset disabled="disabled" class="panel-body">
+            <div class="c-shop-form-1">
+                <!-- BEGIN: ADDRESS FORM -->
+                <div class="">
+                    <div class="row" style="justify-content: center; align-items: center; text-align: center">
+                        <h1 class="control-label center">Lista de Tripulantes:</h1>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            {% for team_member in data.general_team.content %}
+                                <div class="row">
+                                    <div class="form-group col-md-2" style="margin-top: 15px; text-align:center;">
+                                        <label class="control-label center">Tripulante:</label>
+                                    </div>
+                                    <div class="form-group col-md-7" style="margin-top: 15px">
+                                        <input {% if user_data.level == 'USER' or team_member.level == 'OWNER' or team_member.level == user_data.level %} disabled {% endif %} value="{{ team_member.username }}" name="userid_{{ forloop.counter }}" type="text" id="userid_{{ forloop.counter }}" class="form-control c-square c-theme" placeholder="ID">
+                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                    </div>
+                                    <div class="form-group col-md-2" style="margin-top: 10px; margin-bottom: 0">
+                                        <div class="c-checkbox-inline">
+                                            <div class="c-checkbox {% if team_member.level == "OWNER" %} has-info {% endif %}">
+                                                <input {% if user_data.level == 'USER' or team_member.level == 'OWNER' or team_member.level == user_data.level %} disabled {% endif %} {% if team_member.level != "USER" %} checked {% endif %} name="useradmin_{{ forloop.counter }}" type="checkbox" id="useradmin_{{ forloop.counter }}" class="c-check">
+                                                <label for="useradmin_{{ forloop.counter }}">
+                                                    <span style="display: none;" class="inc"></span>
+                                                    <span class="check"></span>
+                                                    <span class="box"></span>
+                                                    {% if team_member.level == "OWNER" %} Owner {% else %} Admin {% endif %}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if user_data.level != 'USER' and team_member.level != 'OWNER' and team_member.level != user_data.level %}
+                                        <div class="form-group col-md-1" style="margin-top: 18px; text-align:left; height: 100%;">
+                                            <label onclick="removeUserEvent(this)" class="glyphicon glyphicon-remove control-label" style="pointer-events: none; cursor: pointer; padding-right:0%"></label>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            {% endfor %}
+                            {% if user_data.level != 'USER'%}
+                                <div class="row" style="display: flex; justify-content: center;">
+                                    <div id="add-user_{{ data.general_team.content|length }}" onclick="addUserEvent(this)" class="btn c-btn-grey-2 c-btn-uppercase c-btn-bold c-btn-border-2x" style="pointer-events: none; text-align:center; margin:1%;">
+                                        Adicionar Utilizador
+                                    </div>
+                                </div>
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <!-- END: ADDRESS FORM -->
+            </div>
+        </fieldset>
+    </form>
+</div>

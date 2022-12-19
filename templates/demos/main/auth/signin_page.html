@@ -1,0 +1,36 @@
+{% extends "../auth/base_page.html" %}
+
+{% load rest_framework %}
+
+{% block content %}
+    <!-- BEGIN: PAGE CONTENT -->
+    <div class="c-content-box c-size-md c-bg-white">
+        <div class="container">
+            <!-- BEGIN: PAGE TITLE -->
+            <div class="c-content-title-1">
+                <h3 class="c-center c-font-uppercase c-font-bold">Inicio de Sessão</h3>
+                <div class="c-line-center c-theme-bg"></div>
+            </div>
+            <!-- END: PAGE TITLE -->
+            <form class="form-horizontal" method="post">
+                {% csrf_token %}
+                {% render_form serializer %}
+                {% if serializer.errors and serializer.errors.non_field_errors %}
+                    <div class="has-error center-block" >
+                        <span class="help-block center-block c-center">{{ serializer.errors.non_field_errors.0 }}</span>
+                    </div>
+                {% endif %}
+                <div class="form-group center-block">
+                    <button type="submit" class="btn c-theme-btn btn-md c-btn-uppercase c-btn-bold c-btn-square c-btn-login center-block">Entrar</button>
+                </div>
+            </form>
+            <div class="modal-footer c-no-border center-block c-padding-20">
+                <div class="c-checkbox center-block c-padding-20" style="width: fit-content">
+                    <span class="c-text-account c-padding-10">Ainda não têm conta ?</span>
+                    <a href="/register" data-toggle="modal" class="btn c-btn-red-2 c-btn-uppercase c-btn-bold c-btn-border-2x c-btn-square">Registar!</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: PAGE CONTENT -->
+{% endblock %}

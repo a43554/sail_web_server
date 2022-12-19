@@ -1,0 +1,219 @@
+<script>
+
+    /***************************************************************/
+    ///////////////////////// ROUTE PATH
+    /***************************************************************/
+
+    function submitRoutePath(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(
+            event,
+            'route_path',
+            (data, _) => {
+                const parentRoot = $('#form_route_path')
+                parentRoot.find('.glyphicon-remove').css('pointer-events', 'none');
+                parentRoot.find('.c-btn-grey-2').css('pointer-events', 'none');
+            },
+            emptyFunction,
+            (data) => {
+                const parentRoot = $('#form_route_path')
+                parentRoot.find('.glyphicon-remove').css('pointer-events', 'auto');
+                parentRoot.find('.c-btn-grey-2').css('pointer-events', 'auto');
+            }
+        );
+    }
+
+    function validateRoutePath(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+            $('[name^="lat_"]').each((idx, elem) => {
+                validateLat(elem)
+            })
+            $('[name^="long_"]').each((idx, elem) => {
+                validateLong(elem)
+            })
+        }
+    }
+
+    function validateLat(elem) {
+        // Parse the float.
+        const lat = parseFloat(elem.value);
+        // The error text.
+        let error_text = null;
+        // Check of errors.
+        if (
+            !/^[+-]?\d+(\.\d+)?$/.test(elem.value)
+            ||
+            !(!isNaN(lat) && isFinite(lat) && Math.abs(lat) <= 90)
+        ) {
+            // Update the error text.
+            error_text = "Latitude têm que ser um número entre 0.0 e 90.0"
+        }
+        // Display the error.
+        if (error_text !== null) {
+            elem.setCustomValidity('Please fix errors');
+            $(elem.parentNode).addClass('has-error');
+            $(elem.parentNode).children("#error_help_text").text(error_text)
+            $(elem.parentNode).children("#error_help_text").show();
+        } else {
+            elem.setCustomValidity('');
+            $(elem.parentNode).removeClass('has-error');
+            $(elem.parentNode).children("#error_help_text").hide();
+        }
+    }
+
+    function validateLong(elem) {
+        const long = parseFloat(elem.value);
+        // The error text.
+        let error_text = null;
+        // Check of errors.
+        if (
+            !/^[+-]?\d+(\.\d+)?$/.test(elem.value)
+            ||
+            !(!isNaN(long) && isFinite(long) && Math.abs(long) <= 180)
+        ) {
+            // Update the error text.
+            error_text = "Longitude têm que ser um número entre 0.0 e 180.0"
+        }
+        // Display the error.
+        if (error_text !== null) {
+            elem.setCustomValidity('Please fix errors');
+            $(elem.parentNode).addClass('has-error');
+            $(elem.parentNode).children("#error_help_text").text(error_text)
+            $(elem.parentNode).children("#error_help_text").show();
+        } else {
+            elem.setCustomValidity('');
+            $(elem.parentNode).removeClass('has-error');
+            $(elem.parentNode).children("#error_help_text").hide();
+        }
+    }
+
+    function bindRoutePath() {
+        $('[name^="lat_"]').bind('input', (event) => {
+            validateLat(event.target);
+        })
+        $('[name^="long_"]').bind('input', (event) => {
+            validateLong(event.target);
+        })
+    }
+
+    function addStopEvent(element) {
+        // Get the id.
+        const element_id = parseInt(element.id.split('_')[1]) + 1;
+        // Update the current id.
+        element.setAttribute("id", "add-stop_" + element_id);
+        // Get the parent.
+        const elementParent = element.parentNode;
+        // Add Another stop.
+        elementParent.insertAdjacentHTML('beforebegin', `
+            <div class="row">
+                <div class="form-group col-md-2" style="margin-top: 15px; text-align:center;">
+                    <label class="control-label center">Paragem:</label>
+                </div>
+                <div class="form-group col-md-4" style="margin-top: 15px">
+                    <input name="lat_${element_id}" id="path_${element_id}" type="text" required class="form-control c-square c-theme" placeholder="Latitude">
+                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                </div>
+                <div class="form-group col-md-4" style="margin-top: 15px">
+                    <input name="long_${element_id}" id="path_${element_id}" type="text" required class="form-control c-square c-theme" placeholder="Longitude">
+                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                </div>
+                <div class="form-group col-md-2" style="margin-top: 18px; text-align:center; height: 100%;">
+                    <label for="path_${element_id}" onclick="removeStopEvent(this)" class="glyphicon glyphicon-remove control-label" style="cursor: pointer; padding-right:0"></label>
+                </div>
+            </div>
+            <div class="c-content-divider c-bg-dark-1" style="margin:0; top:100%; "></div>
+        `)
+        // Perform all binds once again.
+        bindRoutePath();
+    }
+
+    function removeStopEvent(element) {
+        // Get the parent.
+        const elementParent = element.parentNode.parentElement;
+        elementParent.previousElementSibling.remove()
+        elementParent.remove()
+    }
+
+    /***************************************************************/
+    ///////////////////////// ROUTE DURATION
+    /***************************************************************/
+
+    function submitRouteDuration(event) {
+        // Call the abstract submission.
+        abstractFormSectionSubmission(event, 'route_duration');
+    }
+
+    function validateRouteDuration(current_button) {
+        // Check if current button is edit mode.
+        const current_text = $(current_button).text();
+        // Check if text is edit.
+        if (current_text === "Editar") {
+
+        } else {
+            $('[name="route_duration_start"]').each((idx, elem) => {
+                validateStart(elem)
+            })
+            $('[name="route_duration_finish"]').each((idx, elem) => {
+                validateFinish(elem)
+            })
+        }
+    }
+
+    function validateStart(elem) {
+        // Store the value.
+        const inputDate = moment(elem.value, 'DD/MM/YYYY', true);
+        // The error text.
+        let error_text = null;
+        // Must have length 3.
+        if (!inputDate.isValid()) {
+            // Update the error text.
+            error_text = "Data de inicio inválida.";
+        }
+        // Display the error.
+        if (error_text !== null) {
+            elem.setCustomValidity('Please fix errors');
+            $(elem.parentNode.parentNode).addClass('has-error');
+            $(elem.parentNode.parentNode).children("#error_help_text").text(error_text)
+            $(elem.parentNode.parentNode).children("#error_help_text").show();
+        } else {
+            elem.setCustomValidity('');
+            $(elem.parentNode.parentNode).removeClass('has-error');
+            $(elem.parentNode.parentNode).children("#error_help_text").hide();
+        }
+    }
+
+    function validateFinish(elem) {
+        // Store the value.
+        const inputDate = moment(elem.value, 'DD/MM/YYYY', true);
+        // The error text.
+        let error_text = null;
+        // Must have length 3.
+        if (!inputDate.isValid()) {
+            // Update the error text.
+            error_text = "Data de fim inválida.";
+        }
+        // Obtain the start date.
+        const startDate = moment($('[name="route_duration_start"]')[0].value, 'DD/MM/YYYY', true)
+        // Check if it is valid and if it's before the current one.
+        if (startDate.isValid() && !inputDate.isSameOrAfter(startDate)) {
+            // Invalid finish date.
+            error_text = "Data de final de viagem deve ser posterior à de inicio.";
+        }
+        // Display the error.
+        if (error_text !== null) {
+            elem.setCustomValidity('Please fix errors');
+            $(elem.parentNode.parentNode).addClass('has-error');
+            $(elem.parentNode.parentNode).children("#error_help_text").text(error_text)
+            $(elem.parentNode.parentNode).children("#error_help_text").show();
+        } else {
+            elem.setCustomValidity('');
+            $(elem.parentNode.parentNode).removeClass('has-error');
+            $(elem.parentNode.parentNode).children("#error_help_text").hide();
+        }
+    }
+</script>

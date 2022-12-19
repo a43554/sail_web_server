@@ -1,0 +1,83 @@
+<div class="panel tab-pane" id="tab_route_path_content">
+    <div class="c-content-title-1">
+        <h3 class="c-font-uppercase c-font-bold">Rota</h3>
+        <div class="c-line-left"></div>
+    </div>
+    <form id="form_route_path" class="panel-success panel tab-pane">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center;">
+                Trajeto
+                {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                    <button id="button_route_path" type="submit" onclick="validateRoutePath(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>
+                {% endif %}
+                <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+            </h3>
+        </div>
+        <fieldset disabled="disabled" class="panel-body">
+            <div class="c-shop-form-1">
+                <!-- BEGIN: ADDRESS FORM -->
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            <div class="row">
+                                <div class="form-group col-md-2" style="margin-top: 15px; text-align:center;">
+                                    <label for="path_0" class="control-label center">Inicio:</label>
+                                </div>
+                                <div class="form-group col-md-4" style="margin-top: 15px">
+                                    <input name="lat_0" id="path_0" type="text" value="{{ data.route_path.content.start.lat }}" required class="form-control c-square c-theme" placeholder="Latitude">
+                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                </div>
+                                <div class="form-group col-md-4" style="margin-top: 15px">
+                                    <input name="long_0" id="path_0" type="text" value="{{ data.route_path.content.start.long }}" required class="form-control c-square c-theme" placeholder="Longitude">
+                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            {% for stop in data.route_path.content.stops %}
+                                <div class="row">
+                                    <div class="form-group col-md-2" style="margin-top: 15px; text-align:center;">
+                                        <label class="control-label center">Paragem:</label>
+                                    </div>
+                                    <div class="form-group col-md-4" style="margin-top: 15px">
+                                        <input name="lat_{{ forloop.counter }}" id="path_{{ forloop.counter }}" type="text" value="{{ stop.lat }}" required class="form-control c-square c-theme" placeholder="Latitude">
+                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                    </div>
+                                    <div class="form-group col-md-4" style="margin-top: 15px">
+                                        <input name="long_{{ forloop.counter }}" id="path_{{ forloop.counter }}" type="text" value="{{ stop.long }}" required class="form-control c-square c-theme" placeholder="Longitude">
+                                        <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                    </div>
+                                    <div class="form-group col-md-2" style="margin-top: 18px; text-align:center; height: 100%;">
+                                        <label for="path_{{ forloop.counter }}" onclick="removeStopEvent(this)" class="glyphicon glyphicon-remove control-label" style="pointer-events: none; cursor: pointer; padding-right:0"></label>
+                                    </div>
+                                </div>
+                                <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            {% endfor %}
+                            <div class="row" style="display: flex; justify-content: center;">
+                                <div id="add-stop_{{ data.route_path.content.stops|length }}" onclick="addStopEvent(this)" class="btn c-btn-grey-2 c-btn-uppercase c-btn-bold c-btn-border-2x" style="pointer-events: none; text-align:center; margin:1%;">
+                                    Adicionar Paragem
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            <div class="row">
+                                <div class="form-group col-md-2" style="margin-top: 15px; text-align:center;">
+                                    <label for="path_-1" class="control-label center">Fim:</label>
+                                </div>
+                                <div class="form-group col-md-4" style="margin-top: 15px">
+                                    <input name="lat_-1" id="path_-1" type="text" value="{{ data.route_path.content.finish.lat }}" required class="form-control c-square c-theme" placeholder="Latitude">
+                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                </div>
+                                <div class="form-group col-md-4" style="margin-top: 15px">
+                                    <input name="long_-1" id="path_-1" type="text" value="{{ data.route_path.content.finish.long }}" required class="form-control c-square c-theme" placeholder="Longitude">
+                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: ADDRESS FORM -->
+            </div>
+        </fieldset>
+    </form>
+</div>

@@ -1,0 +1,27 @@
+<li class="c-sidebar-menu collapse">
+    <ul class="c-dropdown c-open" style="text-align:center; pointer-events: none; padding-left: 0">
+        <h1 style="font-size: large" href="javascript:;">Geral</h1>
+    </ul>
+</li>
+<li id="selection__general_info" onclick="toggleEvent(this)" class="active c-active" {% if data.general_info.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_general_info_content" aria-expanded="true">Informação
+        {% if data.general_info.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.general_info.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>
+<li id="selection__general_team" onclick="toggleEvent(this)" class="" {% if data.general_team.status == "LOCK" %} style="pointer-events: none" {% endif %}>
+    <a style="cursor: pointer;" data-toggle="tab" href="#tab_general_team_content" aria-expanded="false">Tripulação
+        {% if data.general_team.status == 'LOCK' %}
+            <i class="fa fa-lock" style="color: orange; display: inline-flex;"></i>
+        {% elif data.general_team.status == 'DONE' %}
+            <i class="fa fa-check" style="color: green; display: inline-flex;"></i>
+        {% else %}
+            <i class="fa fa-edit" style="color: blue; display: inline-flex;"></i>
+        {% endif %}
+    </a>
+</li>

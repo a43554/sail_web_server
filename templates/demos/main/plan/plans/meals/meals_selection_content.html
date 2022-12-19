@@ -1,0 +1,172 @@
+<style>
+    .mark-checkbox-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .mark-checkbox-input {
+      display: none;
+    }
+
+    .mark-checkbox-label {
+        transition: .25s ease;
+        display: flex;
+        font-size: 40px;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        vertical-align: middle;
+        content: "";
+        color: white;
+        background-color: red;
+        width: 400px;
+        height: 100px;
+        margin: 0;
+    }
+
+    .mark-checkbox-label:before {
+      content: "✚";
+    }
+    .mark-checkbox-input:checked ~ .mark-checkbox-label:before {
+      content: "✓";
+    }
+
+    .mark-checkbox-input:checked ~ .mark-checkbox-label:hover:before {
+      content: "⨯";
+    }
+
+    .mark-checkbox-input:checked + .mark-checkbox-label:hover {
+        background-color: red;
+    }
+
+    .mark-checkbox-input:not(:checked) ~ .mark-checkbox-label {
+      background-color: orange;
+    }
+
+    .mark-checkbox-input:checked ~ .mark-checkbox-label {
+      background-color: green;
+    }
+
+    .col-sm-half-1 {
+        width: 6%;
+    }
+    .col-md-other-half-1 {
+        width: 96.0%;
+    }
+
+    input.read-more-state {
+      display: none;
+    }
+    label.read-more-target {
+      font-size: 0;
+      max-height: 0;
+      opacity: 0;
+      display: none;
+    }
+    label.read-more-default {
+      font-size: inherit;
+      max-height: 999em;
+      opacity: 1;
+      display: inline-block;
+    }
+    input.read-more-state:checked ~ div.read-more-wrap label.read-more-target {
+      font-size: inherit;
+      max-height: 999em;
+      opacity: 1;
+      display: inline-block;
+    }
+    input.read-more-state:checked ~ div.read-more-wrap label.read-more-default {
+      font-size: 0;
+      max-height: 0;
+      opacity: 0;
+      display: none;
+    }
+    label.read-more-target {
+      cursor: pointer;
+      display: inline-block;
+    }
+    label.read-more-default {
+      cursor: pointer;
+      display: inline-block;
+    }
+</style>
+<div class="panel tab-pane" id="tab_meals_selection_content">
+    <div class="c-content-title-1">
+        <h3 class="c-font-uppercase c-font-bold">Ementa</h3>
+        <div class="c-line-left"></div>
+    </div>
+    <form id="form_meals_selection" class="panel panel-success tab-pane">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center;">
+                Definições
+                {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                    <button id="button_meals_selection" type="submit" onclick="validateMealsSelection(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>
+                {% endif %}
+                <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+            </h3>
+        </div>
+        <fieldset disabled="disabled" class="panel-body">
+            <div class="c-shop-form-1">
+                <!-- BEGIN: ADDRESS FORM -->
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            <div class="row c-body" style="margin: 0; padding: 0">
+		                        <div id="item_list_container" class="c-shop-cart-page-1">
+                                    <div style="justify-content: center; align-items: center; margin-bottom: 2%">
+                                        <input id="search_input_filter" type="text" class="col-md-12 form-control c-square c-theme input-lg" placeholder="Enter keywords or item number" onkeyup="elementFilterFunction()"/>
+                                        <div id="selection_input_filter" class="form-group col-md-12" style="margin-top: 2%; display: flex; width: 100%; justify-content: center; align-items: center;" onchange="elementFilterFunction()">
+                                            <label class="radio-inline">
+                                              <input name="radio" type="radio" id="inlineRadioOptions1" value="all" checked="checked" style="margin-top: 0; vertical-align: middle; height: 100%"> Todos
+                                            </label>
+                                            <label class="radio-inline">
+                                              <input name="radio" type="radio" id="inlineRadioOptions2" value="selected" style="margin-top: 0; vertical-align: middle; height: 100%"> Selecionados
+                                            </label>
+                                            <label class="radio-inline">
+                                              <input name="radio" type="radio" id="inlineRadioOptions3" value="not_selected" style="margin-top: 0; vertical-align: middle; height: 100%"> Não Selecionados
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            <!-- END: SHOPPING CART ITEM ROW -->
+                            {% for dish in data.meals_selection.content.nutrition_data.all_menus %}
+                                <div class="row c-cart-table-row" style="margin: 2px 2px; display: flex; align-items: stretch;">
+                                    <div class="mark-checkbox-container" style="height: 100px; width: 55px; pointer-events: none;">
+                                        <input name="dish_selection_{{ dish.id }}" {% if dish.selected %} checked="checked" {% endif %} type="checkbox" id="_checkbox_{{ forloop.counter }}" class="mark-checkbox-input"/>
+                                        <label class="mark-checkbox-label c-size-md c-center" style="height:100%; width:100%;" for="_checkbox_{{ forloop.counter }}"></label>
+                                    </div>
+                                    <div class="c-cart-desc" style="padding-left:2%; margin-right:0;">
+                                        <h3><a style="pointer-events: none" href="shop-product-details-2.html" class="c-font-bold c-theme-link c-font-22 c-font-dark">{{ dish.name }}</a><i id="meal_info_button" data-toggle="modal" class="fa fa-info-circle" onclick="changeDishModal({{ dish }})" style="margin-left: 5px; color: #16a1de; display: inline-flex; cursor: pointer; padding-left: 3px;"></i></h3>
+                                        <p class="read-more-default" for="read-more-controller-{{ forloop.counter }}">{{ dish.description.short }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <!-- END: ADDRESS FORM -->
+            </div>
+        </fieldset>
+    </form>
+
+
+<div id="meal_import_modal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content c-square">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myLargeModalLabel">Informação</h4>
+            </div>
+            <div class="modal-body">
+                <h6></h6>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+</div>

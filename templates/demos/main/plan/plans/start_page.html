@@ -1,0 +1,222 @@
+{% extends "../../headers/plan_header_page.html" %}
+
+{% block content %}
+    <style>
+        .c-dropdown-menu > li.c-active {
+            background-color: #eaeef1;
+        }
+    </style>
+    {% include "./start_page_scripts.html" %}
+    {% include "./general/scripts_general.html" %}
+    {% include "./route/scripts_route.html" %}
+    {% include "./assignments/scripts_assignments.html" %}
+    {% include "./meals/scripts_meals.html" %}
+    <script>
+        // Function to create more stops.
+        function toggleEvent(element) {
+            $('.c-dropdown-menu > li.c-active').removeClass('c-active')
+            $(element).addClass('c-active');
+        }
+
+        // Setup necessary tabs.
+        function setupLocks() {
+            // Transform the data into a dictionary.
+            const data_dictionary = {{ data|safe }};
+            // Iterate through each section.
+            Object.keys(data_dictionary).forEach(function(key) {
+                // Obtain the value.
+                const status = data_dictionary[key];
+                // Toggle the element.
+                modifySection(key, status);
+            });
+        }
+
+        // Search the data array.
+        function searchDataArray(dataArray, preceding_string = '_') {
+            // Check if array exists and is not empty.
+            if (dataArray === null) {
+                // Do nothing.
+                return;
+            }
+
+            if (dataArray["assignments_settings"] === 'LOCK') {
+                $("#append_new_task").css("pointer-events", "none");
+                $("#import_new_task").css("pointer-events", "none");
+            } else if (dataArray["assignments_settings"] === 'TODO') {
+                $("#append_new_task").css("pointer-events", "none");
+                $("#import_new_task").css("pointer-events", "none");
+            } else if (dataArray["assignments_settings"] === 'DONE') {
+                $("#append_new_task").css("pointer-events", "auto");
+                $("#import_new_task").css("pointer-events", "auto");
+            }
+
+            // Iterate through each level.
+            Object.keys(dataArray).forEach(function(key) {
+                // Obtain the data.
+                const data = dataArray[key];
+                // Toggle the element.
+                modifySection(key, data);
+            });
+        }
+
+        window.onload = function () {
+            bindRoutePath();
+            bindTaskAccordions();
+            // setupLocks();
+            $("#form_general_info").submit(submitGeneralInfo);
+            $("#form_general_team").submit(submitGeneralTeam);
+
+            $("#form_route_path").submit(submitRoutePath);
+            $("#form_route_duration").submit(submitRouteDuration);
+
+            $("#form_assignments_settings").submit(submitAssignmentSettings);
+            $("form[id^=form_assignments_tasks]").submit(submitAssignmentTasks);
+            $("#form_assignments_options").submit(submitAssignmentOptions);
+            $("#form_assignments_schedule").submit(submitAssignmentSchedule);
+
+            $("#form_meals_settings").submit(submitMealsSettings);
+            $("#form_meals_selection").submit(submitMealsSelection);
+            $("#form_meals_schedule").submit(submitMealsSchedule);
+        }
+        var ComponentsDateTimePickers = function () {
+
+            var handleDatePickers = function () {
+
+                if (jQuery().datepicker) {
+                    $('.date-picker').datepicker({
+                        rtl: App.isRTL(),
+                        orientation: "left",
+                        autoclose: true
+                    });
+                    //$('body').removeClass("modal-open"); // fix bug when inline picker is used in modal
+                }
+
+                /* Workaround to restrict daterange past date select: http://stackoverflow.com/questions/11933173/how-to-restrict-the-selectable-date-ranges-in-bootstrap-datepicker */
+
+                // Workaround to fix datepicker position on window scroll
+                $( document ).scroll(function(){
+                    $('#form_modal2 .date-picker').datepicker('place'); //#modal is the id of the modal
+                });
+            }
+
+            return {
+                //main function to initiate the module
+                init: function () {
+                    handleDatePickers();
+                }
+            };
+
+        }();
+</script>
+    <div class="c-layout-breadcrumbs-1 c-subtitle c-fonts-uppercase c-fonts-bold c-bordered c-bordered-both">
+        <div class="container">
+            <!-- LEFT SIDED INFORMATION -->
+            <div class="c-page-title c-pull-left">
+                <h3 class="c-font-uppercase c-font-sbold">Plano de Viagem</h3>
+                <h4 class="">Editar informação sobre a viagem</h4>
+            </div>
+            <!-- RIGHT SIDED -->
+            <ul class="c-page-breadcrumbs c-theme-nav c-pull-right c-fonts-regular">
+                <li><a href="/plans/">Planos</a></li>
+                <li>/</li>
+                <li class="c-state_active">Editar</li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+        <div class="c-layout-sidebar-menu c-theme ">
+            <!-- BEGIN: LAYOUT/SIDEBARS/SHOP-SIDEBAR-DASHBOARD -->
+            <div class="c-sidebar-menu-toggler">
+                <h3 class="c-title c-font-uppercase c-font-bold">Geral</h3>
+                <a href="javascript:;" class="c-content-toggler" data-toggle="collapse" data-target="#sidebar-menu-1">
+                    <span class="c-line"></span> <span class="c-line"></span> <span class="c-line"></span>
+                </a>
+            </div>
+            <div id="fieldset_selection_list">
+                <ul class="c-sidebar-menu collapse " id="sidebar-menu-1">
+                    <li class="c-dropdown c-active c-open">
+    {#                    <a href="javascript:;">Geral</a>#}
+                        <ul class="nav c-dropdown-menu">
+                            {# INCLUDE THE GENERAL #}
+                            {% include "./general/selection_general.html" %}
+                            {# INCLUDE THE ROUTE #}
+                            {% include "./route/selection_route.html" %}
+                            {# INCLUDE THE ASSIGNMENTS #}
+                            {% include "./assignments/selection_assignments.html" %}
+                            {# INCLUDE THE ASSIGNMENTS #}
+                            {% include "./meals/selection_meals.html" %}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="c-layout-sidebar-content tab-content">
+            {# INCLLUDE THE GENERAL-INFO #}
+            {% include "./general/general_info_content.html" %}
+            {# INCLLUDE THE GENERAL-TEAM #}
+            {% include "./general/general_team_content.html" %}
+
+            {# INCLLUDE THE ROUTE-PATH #}
+            {% include "./route/route_path_content.html" %}
+            {# INCLLUDE THE ROUTE-DURATION #}
+            {% include "./route/route_duration_content.html" %}
+
+            {# INCLLUDE THE ASSIGNMENTS-SETTINGS #}
+            {% include "./assignments/assignments_settings_content.html" %}
+            {% include "./assignments/assignments_tasks_content.html" %}
+            {% include "./assignments/assignments_options_content.html" %}
+            {% include "./assignments/assignments_schedule_content.html" %}
+            {% include "./assignments/import_tasks.html" %}
+
+            {# INCLLUDE THE MEALS-SETTINGS #}
+            {% include "./meals/meals_settings_content.html" %}
+            {% include "./meals/meals_selection_content.html" %}
+            {% include "./meals/meals_schedule_content.html" %}
+
+	<!-- END: PAGE CONTENT -->
+        </div>
+    </div>
+
+    <div id="error_info_modal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content c-square">
+                <div class="modal-header" style="background-color: #ff8181">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title" id="myLargeModalLabel">Erro!</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="error_model_text_body">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua.
+                    </p>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <div id="warning_info_modal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content c-square">
+                <div class="modal-header" style="background-color: #ffdb81">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title" id="myLargeModalLabel">Aviso!</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="warning_model_text_body">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua.
+                    </p>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+{% endblock %}

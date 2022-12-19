@@ -1,0 +1,64 @@
+<div class="panel tab-pane" id="tab_route_duration_content">
+    <div class="c-content-title-1">
+        <h3 class="c-font-uppercase c-font-bold">Rota</h3>
+        <div class="c-line-left"></div>
+    </div>
+    <form id="form_route_duration" class="panel panel-success tab-pane" style="margin-bottom: 300px">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center;">
+                Duração
+                {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                    <button id="button_route_duration" type="submit" onclick="validateRouteDuration(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>
+                {% endif %}
+                <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+            </h3>
+        </div>
+        <fieldset disabled="disabled" class="panel-body">
+            <div class="c-shop-form-1">
+                <!-- BEGIN: ADDRESS FORM -->
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            <div class="row">
+                                <div class="form-group col-md-2" style="margin-top: 15px; text-align:center;">
+                                    <label for="route_duration_start" class="control-label center">Inicio:</label>
+                                </div>
+                                <div class="form-group col-md-8" style="margin-top: 15px">
+                                    <div class="input-group input-medium date date-picker" data-date-format="dd/mm/yyyy" data-rtl="false">
+                                        <input name="route_duration_start" id="route_duration_start" type="text" value="{{ data.route_duration.content.start }}" class="form-control c-square c-theme">
+                                        <span class="input-group-btn">
+                                            <button class="btn default c-btn-square" type="button">
+                                                <i class="fa fa-calendar"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                            <div class="row">
+                                <div class="form-group col-md-2" style="margin-top: 15px; text-align:center;">
+                                    <label for="route_duration_finish" class="control-label center">Fim:</label>
+                                </div>
+                                <div class="form-group col-md-8" style="margin-top: 15px">
+                                    <div class="input-group input-medium date date-picker" data-date-format="dd/mm/yyyy" data-rtl="false">
+                                        <input name="route_duration_finish" id="route_duration_finish" type="text" value="{{ data.route_duration.content.finish }}" class="form-control c-square c-theme">
+                                        <span class="input-group-btn">
+                                            <button class="btn default c-btn-square" type="button">
+                                                <i class="fa fa-calendar"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                    <span id="error_help_text" style="display: none" class="help-block">A block of help text.</span>
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; "></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: ADDRESS FORM -->
+            </div>
+        </fieldset>
+    </form>
+</div>

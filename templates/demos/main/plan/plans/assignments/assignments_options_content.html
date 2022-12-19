@@ -1,0 +1,107 @@
+<div class="panel tab-pane" id="tab_assignments_options_content">
+    <div class="c-content-title-1">
+        <h3 class="c-font-uppercase c-font-bold">Tarefas</h3>
+        <div class="c-line-left"></div>
+    </div>
+    <form id="form_assignments_options" class="panel panel-success tab-pane">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center;">
+                Qualificações
+                {% if user_data.level == 'ADMIN' or user_data.level == 'OWNER' %}
+                    <button id="button_assignments_options" type="submit" onclick="validateAssignmentsOptions(this)" class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="float: right; padding-bottom:2px; margin-top:-3px;">Editar</button>
+                {% endif %}
+                <a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>
+            </h3>
+        </div>
+        <fieldset disabled="disabled" class="panel-body">
+            <div class="c-shop-form-1">
+                <!-- BEGIN: ADDRESS FORM -->
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; display: {% if data.assignments_tasks|length > 1 %} flex {% else %} none {% endif %}"></div>
+                            <div id="shift_incompatibility_table_row" class="row c-margin-t-20" style="display: {% if data.assignments_tasks|length > 1 %} flex {% else %} none {% endif %}">
+                                <div class="form-group col-md-12" role="group" style="display: flex; justify-content: center;">
+                                    <div class="c-body" style="margin: 0; padding: 0">
+                                        <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                            <thead>
+                                                <tr id="day_counter_holder" class="active">
+                                                    <th style="border-color: #000000; width: 20%" class="c-center">Tarefas Compativeis</th>
+                                                    {% for task in data.assignments_tasks %}
+                                                        <th id="day_counter" style="border-color: #000000" class="c-size-md c-center">{{ task.content.name }}
+                                                    {% endfor %}
+                                                </tr>
+                                            </thead>
+                                            <tbody id="valid_shifts_body_task_{{ forloop.counter }}">
+                                                {% for task in data.assignments_tasks %}
+                                                    <tr>
+                                                        <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ task.content.name }}</th>
+                                                        {% for other_task in data.assignments_tasks %}
+                                                            <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                                                <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                                                                    <div {% if task.content.true_id == other_task.content.true_id %} style="display: none" {% endif %} class="c-checkbox has-success">
+                                                                        <input onclick="switchCheckBox(this)" {% if task.content.id == other_task.content.id %} disabled {% endif %} {% if other_task.content.true_id not in task.content.incompatible_tasks %} checked {% endif %} name="incompatible_tasks__{{ task.content.true_id }}__{{ other_task.content.true_id }}" type="checkbox" id="incompatible_tasks__{{ task.content.true_id }}__{{ other_task.content.true_id }}" class="c-check">
+                                                                        <label style="padding: 0; display:inline-block;" for="incompatible_tasks__{{ task.content.true_id }}__{{ other_task.content.true_id }}">
+                                                                            <span style="display: none;" class="inc"></span>
+                                                                            <span class="check"></span>
+                                                                            <span class="box"></span>
+                                                                            &nbsp;&nbsp;&nbsp;
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="c-content-divider c-bg-dark-1" style="margin:0%; top:100%; display: {% if data.assignments_tasks|length > 0 %} flex {% else %} none {% endif %}"></div>
+                            <div id="team_incompatibility_table_row" class="row c-margin-t-20" style="display: {% if data.assignments_tasks|length > 0 %} flex {% else %} none {% endif %}">
+                                <div class="form-group col-md-12" role="group" style="display: flex; justify-content: center;">
+                                    <div class="c-body" style="margin: 0; padding: 0">
+                                        <table class="table table-bordered" style="width: 100%; table-layout: fixed; border-color: #000000">
+                                            <thead>
+                                                <tr id="day_counter_holder" class="active">
+                                                    <th style="border-color: #000000; width: 20%" class="c-center">Utilizadores Qualificados</th>
+                                                    {% for task in data.assignments_tasks %}
+                                                        <th id="day_counter" style="border-color: #000000" class="c-size-md c-center">{{ task.content.name }}
+                                                    {% endfor %}
+                                                </tr>
+                                            </thead>
+                                            <tbody id="valid_shifts_body_task_{{ forloop.counter }}">
+                                                {% for member in data.general_team.content %}
+                                                    <tr>
+                                                        <th style="white-space: pre-line; border-color: #000000; text-align: center; vertical-align: middle;">{{ member.username }}</th>
+                                                        {% for task in data.assignments_tasks %}
+                                                            <th style="border-color: #000000; text-align: center; vertical-align: middle;">
+                                                                <div class="c-checkbox-inline" style="padding-top: 5px; padding-right: 5px;">
+                                                                    <div class="c-checkbox has-success">
+                                                                        <input {% if member.user_id in task.content.qualified_members %} checked {% endif %} name="incompatible_team__{{ task.content.true_id }}__{{ member.user_id }}" type="checkbox" id="incompatible_tasks__{{ task.content.true_id }}__{{ member.user_id }}" class="c-check">
+                                                                        <label style="padding: 0; display:inline-block;" for="incompatible_tasks__{{ task.content.true_id }}__{{ member.user_id }}">
+                                                                            <span style="display: none;" class="inc"></span>
+                                                                            <span class="check"></span>
+                                                                            <span class="box"></span>
+                                                                            &nbsp;&nbsp;&nbsp;
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END: ADDRESS FORM -->
+            </div>
+        </fieldset>
+    </form>
+</div>

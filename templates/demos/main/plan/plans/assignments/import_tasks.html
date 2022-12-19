@@ -1,0 +1,488 @@
+<style>
+    .grid-container {
+        display: grid;
+        grid-template: auto / auto;
+        grid-gap: 20px;
+    }
+    .grid-container > div {
+        text-align: center;
+        width: inherit;
+        {#padding: 20px 20px;#}
+        font-size: 30px;
+    }
+
+    .custom_tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .custom_tooltip .custom_tooltip_text {
+      visibility: hidden;
+      width: auto;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 5px;
+
+      /* Position the tooltip */
+      position: absolute;
+      z-index: 1;
+      top: -5px;
+      right: 105%;
+      margin-left: -60px;
+    }
+
+    .custom_tooltip:hover .custom_tooltip_text {
+      visibility: visible;
+    }
+
+</style>
+
+<script>
+
+    function triStateCheckbox(cb) {
+        if (cb.readOnly) cb.checked=cb.readOnly=false;
+        else if (!cb.checked) cb.readOnly=cb.indeterminate=true;
+    }
+
+    function individualCheck(listItem, expectedValue, actualFieldNameId) {
+        // Check for plan title.
+        const actualElement = listItem.find(actualFieldNameId)[0];
+        // Check if title matches.
+        return (
+            (
+                expectedValue === ""
+            )
+            ||
+            (
+                actualElement.innerText.replaceAll(/\s/g, '').toUpperCase() === String(expectedValue)
+            )
+        )
+    }
+
+    function taskFilterFunction() {
+        // The root element.
+        const element_root = $(".container")
+        // Get all items.
+        const panels = element_root.find("#task_selection_accordion").find(".panel");
+
+        const input_elements = Array.from(
+            document
+                .getElementById("selection_input_filter")
+                .getElementsByTagName("input")
+        )
+
+        // Iterate through each element.
+        input_elements.forEach((element) => {
+            // Check if element is checked.
+            if (element.checked) {
+                // Set the element color.
+                $(element.parentNode).css('background-color', 'cornflowerblue');
+            } else {
+                // Set the element color.
+                $(element.parentNode).css('background-color', '');
+            }
+        });
+        // Get the selected option value.
+        const selected_option = input_elements.find((element) => element.checked).value;
+
+
+        // Get the string used for filtering.
+        const expectedTaskTitleDescription = element_root.find("#import_task__task_search_input_filter").val().toUpperCase();
+        // Get the string used for filtering.
+        const expectedPlanTitleDescription = element_root.find("#import_task__plan_search_input_filter").val().toUpperCase();
+        // Get the string used for filtering.
+        const expectedPlanCrewSize = element_root.find("#import_task__crew_size_search_input_filter").val().toUpperCase();
+        // Get the string used for filtering.
+        const expectedPlanShiftSize = element_root.find("#import_task__shifts_search_input_filter").val().toUpperCase();
+        // Get the string used for filtering.
+        const expectedMinPeoplePerShiftSize = element_root.find("#import_task__min_people").val().toUpperCase();
+        // Get the string used for filtering.
+        const expectedMaxPeoplePerShiftSize = element_root.find("#import_task__max_people").val().toUpperCase();
+
+        // Get the string used for filtering.
+        const expectedPeoplePerCycle = (
+            element_root.find("#import_task__people_cycle")[0].checked ? true : (
+                element_root.find("#import_task__people_cycle")[0].indeterminate ? null : false
+            )
+        );
+        // Get the string used for filtering.
+        const expectedTargetPeoplePerCycle = element_root.find("#import_task__people_cycle_target").val().toUpperCase();
+        // Get the string used for filtering.
+        const expectedTotalPeoplePerCycle = element_root.find("#import_task__people_cycle_total").val().toUpperCase();
+
+
+        // Get the string used for filtering.
+        const expectedTaskPerCycle = (
+            element_root.find("#import_task__task_cycle")[0].checked ? true : (
+                element_root.find("#import_task__task_cycle")[0].indeterminate ? null : false
+            )
+        );
+        // Get the string used for filtering.
+        const expectedTargetTaskPerCycle = element_root.find("#import_task__task_cycle_target").val().toUpperCase();
+        // Get the string used for filtering.
+        const expectedTotalTaskPerCycle = element_root.find("#import_task__task_cycle_total").val().toUpperCase();
+
+        // Get the string used for filtering.
+        const expectedSequentialSettings = (
+            element_root.find("#import_task__seq_settings")[0].checked ? true : (
+                element_root.find("#import_task__seq_settings")[0].indeterminate ? null : false
+            )
+        );
+        // Get the string used for filtering.
+        const expectedDiversifySequentialSettings = (
+            element_root.find("#import_task__seq_settings_diverse")[0].checked ? true : (
+                element_root.find("#import_task__seq_settings_diverse")[0].indeterminate ? null : false
+            )
+        );
+        // Get the string used for filtering.
+        const expectedTargetSequentialSettings = element_root.find("#import_task__seq_settings_target").val().toUpperCase();
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (let i = 0; i < panels.length; i++) {
+            // Obtain the jquery version.
+            const listItem = $(panels[i]);
+
+            // Check for task title.
+            const actualTaskTitle = listItem.find("#import_tasks__field__task_name")[0];
+            const actualTaskDescription = listItem.find("#import_tasks__field__task_description")[0];
+            // Check if title matches.
+            const taskDescriptionTitleMatch = (
+                (
+                    expectedTaskTitleDescription === ""
+                )
+                ||
+                (
+                    actualTaskTitle.textContent.toUpperCase().indexOf(expectedTaskTitleDescription) > -1
+                )
+                ||
+                (
+                    actualTaskDescription.textContent.toUpperCase().indexOf(expectedTaskTitleDescription) > -1
+                )
+            );
+
+            // Check for plan title.
+            const actualPlanTitle = listItem.find("#import_tasks__field__plan_name")[0];
+            const actualPlanDescription = listItem.find("#import_tasks__field__plan_description")[0];
+            // Check if title matches.
+            const planDescriptionTitleMatch = (
+                (
+                    expectedPlanTitleDescription === ""
+                )
+                ||
+                (
+                    actualPlanTitle.textContent.toUpperCase().indexOf(expectedPlanTitleDescription) > -1
+                )
+                ||
+                (
+                    actualPlanDescription.textContent.toUpperCase().indexOf(expectedPlanTitleDescription) > -1
+                )
+            );
+
+            // Check if title matches.
+            const planCrewSizeMatch = individualCheck(
+                listItem, expectedPlanCrewSize, "#import_tasks__field__team_count"
+            );
+            // Check if title matches.
+            const planShiftSizeMatch = individualCheck(
+                listItem, expectedPlanShiftSize, "#import_tasks__field__shift_count"
+            );
+            // Check if title matches.
+            const taskMinPeoplePerShiftMatch = individualCheck(
+                listItem, expectedMinPeoplePerShiftSize, "#import_tasks__field__min_people_shift"
+            );
+            // Check if title matches.
+            const taskMaxPeoplePerShiftMatch = individualCheck(
+                listItem, expectedMaxPeoplePerShiftSize, "#import_tasks__field__max_people_shift"
+            );
+
+            const actualTaskPeopleCycle = listItem.find("#import_tasks__field__people_cycle")
+            let taskPeopleCycleMatch;
+            // Check if an item was found.
+            if (expectedPeoplePerCycle === false) {
+                taskPeopleCycleMatch = true;
+            } else if (actualTaskPeopleCycle.length === 0) {
+                taskPeopleCycleMatch = (expectedPeoplePerCycle !== true)
+            } else if (expectedPeoplePerCycle === null) {
+                taskPeopleCycleMatch = false;
+            } else {
+                const searchVariable = $(actualTaskPeopleCycle[0])
+                // Check if title matches.
+                const taskTargetPeopleCycleMatch = individualCheck(
+                    searchVariable, expectedTargetPeoplePerCycle, "#import_tasks__field__people_cycle_target"
+                );
+                // Check if title matches.
+                const taskTotalPeopleCycleMatch = individualCheck(
+                    searchVariable, expectedTotalPeoplePerCycle, "#import_tasks__field__people_cycle_total"
+                );
+                taskPeopleCycleMatch = taskTargetPeopleCycleMatch && taskTotalPeopleCycleMatch;
+            }
+
+            const actualTaskTaskCycle = listItem.find("#import_tasks__field__task_cycle")
+            let taskTaskCycleMatch;
+            // Check if an item was found.
+            if (expectedTaskPerCycle === false) {
+                taskTaskCycleMatch = true;
+            } else if (actualTaskTaskCycle.length === 0) {
+                taskTaskCycleMatch = (expectedTaskPerCycle !== true);
+            } else if (expectedTaskPerCycle === null) {
+                taskTaskCycleMatch = false;
+            } else {
+                const searchVariable = $(actualTaskTaskCycle[0])
+                // Check if title matches.
+                const taskTargetTaskCycleMatch = individualCheck(
+                    searchVariable, expectedTargetTaskPerCycle, "#import_tasks__field__task_cycle_target"
+                );
+                // Check if title matches.
+                const taskTotalTaskCycleMatch = individualCheck(
+                    searchVariable, expectedTotalTaskPerCycle, "#import_tasks__field__task_cycle_total"
+                );
+                taskTaskCycleMatch = taskTargetTaskCycleMatch && taskTotalTaskCycleMatch;
+            }
+
+
+            const actualTaskSequentialSettings = listItem.find("#import_tasks__field__seq_settings")
+            let taskSequentialSettingsMatch;
+            // Check if an item was found.
+            if (expectedSequentialSettings === false) {
+                taskSequentialSettingsMatch = true;
+            } else if (actualTaskSequentialSettings.length === 0) {
+                taskSequentialSettingsMatch = (expectedSequentialSettings !== true);
+            } else if (expectedSequentialSettings === null) {
+                taskSequentialSettingsMatch = false;
+            } else {
+                const searchVariable = $(actualTaskSequentialSettings[0])
+                // Check if title matches.
+                const taskTargetSequentialSettingsMatch = individualCheck(
+                    searchVariable, expectedTargetSequentialSettings, "#import_tasks__field__seq_settings_target"
+                );
+                const actualTaskSequentialSettingsDiverse = searchVariable.find(
+                    "#import_tasks__field__seq_settings_diverse"
+                )[0].innerText.replaceAll(/\s/g, '').toUpperCase() === "V";
+                // Check if an item was found.
+                if (expectedDiversifySequentialSettings === false) {
+                    taskSequentialSettingsMatch = taskTargetSequentialSettingsMatch;
+                } else if (expectedDiversifySequentialSettings === true) {
+                    taskSequentialSettingsMatch = actualTaskSequentialSettingsDiverse && taskTargetSequentialSettingsMatch;
+                } else {
+                    taskSequentialSettingsMatch = !actualTaskSequentialSettingsDiverse && taskTargetSequentialSettingsMatch;
+                }
+            }
+
+            {#// Check if title matches.#}
+            {#const taskPeoplePerShiftMatch = individualCheck(#}
+            {#    listItem, expectedPlanCrewSize, "#import_tasks__field__ppl_shift"#}
+            {#);#}
+            {#// Check if title matches.#}
+            {#const taskSequentialMatch = individualCheck(#}
+            {#    listItem, expectedPlanCrewSize, "#import_tasks__field__seq"#}
+            {#);#}
+            {#// Check if title matches.#}
+            {#const taskPeoplePerCycleMatch = individualCheck(#}
+            {#    listItem, expectedPlanCrewSize, "#import_tasks__field__ppl_cycle"#}
+            {#);#}
+            {#// Check if title matches.#}
+            {#const taskTaskPerCycleMatch = individualCheck(#}
+            {#    listItem, expectedPlanCrewSize, "#import_tasks__field__task_cycle"#}
+            {#);#}
+
+            {##}
+            {#// Check if a title match exists.#}
+            {#const title = panels[i].getElementsByClassName("cbp-l-grid-projects-title")[0];#}
+            {#const title_match = (title.textContent || title.innerText).toUpperCase().indexOf(str_filter) > -1;#}
+            {#// Check the selection.#}
+            {#const is_participant = panels[i].getElementsByClassName("fa-ticket").length !== 0;#}
+            {#// Check if a match exists.#}
+            {#const subtitle = panels[i].getElementsByClassName("cbp-l-grid-projects-desc")[0];#}
+            {#const body_match = (subtitle.textContent || subtitle.innerText).toUpperCase().indexOf(str_filter) > -1;#}
+            {##}
+            {#// The crew size#}
+            {#const crew_size = $(panels[i]).find("#crew_size").text().replace(/\s/g,'');#}
+            {#const crew_match = (crew_filter === "" || crew_size === crew_filter)#}
+            {##}
+            {#// The meal size#}
+            {#const meal_size = $(panels[i]).find("#meal_size").text().replace(/\s/g,'');#}
+            {#const meal_match = (meal_filter === "" || meal_size === meal_filter)#}
+            {##}
+            {#// The task size#}
+            {#const shift_size = $(panels[i]).find("#shift_size").text().replace(/\s/g,'');#}
+            {#const shift_match = (shift_filter === "" || shift_size === shift_filter)#}
+
+            if (
+                taskDescriptionTitleMatch &&
+                planDescriptionTitleMatch &&
+                planCrewSizeMatch &&
+                planShiftSizeMatch &&
+                taskMinPeoplePerShiftMatch && taskMaxPeoplePerShiftMatch &&
+                taskPeopleCycleMatch &&
+                taskTaskCycleMatch &&
+                taskSequentialSettingsMatch
+            ) {
+                panels[i].style.display = "block";
+            } else {
+                panels[i].style.display = "none";
+            }
+        }
+    }
+</script>
+
+<div id="task_import_modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content c-square">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myLargeModalLabel">Importar Tarefas</h4>
+            </div>
+            <div class="modal-body">
+            <div id="plan_filters" class="cbp-l-filters-button" style="justify-content: center; align-items: center; margin-bottom: 2%">
+                <input id="import_task__plan_search_input_filter" type="text" class="col-md-12 form-control c-square c-theme input-lg" placeholder="Procurar plano por título ou descrição" onkeyup="taskFilterFunction()"/>
+                <input id="import_task__crew_size_search_input_filter" type="number" style="width: calc(100% / 2)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Tamanho da tripulação" onkeyup="taskFilterFunction()"/>
+                <input id="import_task__shifts_search_input_filter" type="number" style="width: calc(100% / 2)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Número de turnos" onkeyup="taskFilterFunction()"/>
+
+                <input style="margin-top: 10px" id="import_task__task_search_input_filter" type="text" class="col-md-12 form-control c-square c-theme input-lg" placeholder="Procurar tarefa por título ou descrição" onkeyup="taskFilterFunction()"/>
+                <input id="import_task__min_people" type="number" style="width: calc(100% / 2)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Minimo de pessoas" onkeyup="taskFilterFunction()"/>
+                <input id="import_task__max_people" type="number" style="width: calc(100% / 2)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Maximo de pessoas" onkeyup="taskFilterFunction()"/>
+
+                <div style="width: calc(100% * 4/60)" class="col-md-6 form-control c-square c-theme input-lg">
+                    <input onclick="triStateCheckbox(this)" name="import_task__people_cycle" type="checkbox" id="import_task__people_cycle" class="c-check" onchange="taskFilterFunction()">
+                </div>
+                <input id="import_task__people_cycle_target" type="number" style="width: calc(100% * 28/60)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Tarefas a realizar por cada utilizador em cada ciclo" onkeyup="taskFilterFunction()"/>
+                <input id="import_task__people_cycle_total" type="number" style="width: calc(100% * 28/60)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Número de turnos que constitui cada ciclo" onkeyup="taskFilterFunction()"/>
+
+                <div style="width: calc(100% * 4/60)" class="col-md-6 form-control c-square c-theme input-lg">
+                    <input onclick="triStateCheckbox(this)" name="import_task__task_cycle" type="checkbox" id="import_task__task_cycle" class="c-check" onchange="taskFilterFunction()">
+                </div>
+                <input id="import_task__task_cycle_target" type="number" style="width: calc(100% * 28/60)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Tarefas a realizar em cada ciclo" onkeyup="taskFilterFunction()"/>
+                <input id="import_task__task_cycle_total" type="number" style="width: calc(100% * 28/60)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Número de turnos que constitui cada ciclo" onkeyup="taskFilterFunction()"/>
+
+                <div style="width: calc(100% * 4/60)" class="col-md-6 form-control c-square c-theme input-lg">
+                    <input onclick="triStateCheckbox(this)" name="import_task__seq_settings" type="checkbox" id="import_task__seq_settings" class="c-check" onchange="taskFilterFunction()">
+                </div>
+                <div style="width: calc(100% * 28/60)" class="col-md-6 form-control c-square c-theme input-lg">
+                    <label style="color: #afafaf; font-size: 16px" for="import_task__seq_settings_diverse">Diversificar tripulação  </label>
+                    <input onclick="triStateCheckbox(this)" name="import_task__seq_settings_diverse" type="checkbox" id="import_task__seq_settings_diverse" class="c-check" onchange="taskFilterFunction()">
+                </div>
+                <input id="import_task__seq_settings_target" type="number" style="width: calc(100% * 28/60)" class="col-md-6 form-control c-square c-theme input-lg" placeholder="Número de turnos a realizar em sequencia" onkeyup="taskFilterFunction()"/>
+
+            </div>
+            <div id="grid-container" class="cbp cbp-caption-active cbp-caption-overlayBottomReveal cbp-ready" style="margin-top: 40%; height: 100%;">
+                <div class="cbp-wrapper-outer">
+                    <div class="panel-group grid-container" role="tablist" id="task_selection_accordion">
+                    {% for task in search_data.tasks %}
+                        <div class="panel">
+							<div style="background-color: rgba(14,144,210,0.75);" class="panel-heading" role="tab" id="panel_heading_{{ forloop.counter0 }}">
+                                <table class="panel-title" data-toggle="collapse" data-parent="#task_selection_accordion" href="#panel_collapse_{{ forloop.counter0 }}" aria-expanded="false" aria-controls="panel_collapse_{{ forloop.counter0 }}" style="width: 100%">
+                                    <tr>
+                                        <th>
+                                            <h4 style="text-align: start; margin: 0;">
+                                                <a id="import_tasks__field__task_name" class="c-font-bold c-font-19 collapsed" style="white-space: nowrap; color: white; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">{{ task.task_data.display }}</a>
+                                            </h4>
+                                        </th>
+                                        {% if task.task_data.extra_data.people_per_shift_task.setting_value != null %}
+                                            <th class="custom_tooltip" style="margin-left: 10px; margin-right: 10px; margin-top: 0; float:right; white-space: nowrap; color: white; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                                <div style="display: inline-block" id="import_tasks__field__min_people_shift">{{ task.task_data.extra_data.people_per_shift_task.setting_value.min_amount }}</div>
+                                                /
+                                                <div style="display: inline-block" id="import_tasks__field__max_people_shift">{{ task.task_data.extra_data.people_per_shift_task.setting_value.max_amount }}</div>
+                                                <i class="fa fa-users" style="color: white;"></i>
+                                                <span class="custom_tooltip_text">Opções Tripulante/Turno<br>A/B onde A é a quantidade minima e B a quantidade maxima de individuos <br>que devem estar a realizar a tarefa em cada turno onde esta possa ocorrer</span>
+                                            </th>
+                                        {% endif %}
+                                        {% if task.task_data.extra_data.per_task_cycle_settings.setting_value != null %}
+                                            <th id="import_tasks__field__task_cycle" class="custom_tooltip" style="margin-left: 10px; margin-right: 10px; margin-top: 0; float:right; white-space: nowrap; color: white; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                                <div style="display: inline-block" id="import_tasks__field__task_cycle_target">
+                                                    {{ task.task_data.extra_data.per_task_cycle_settings.setting_value.assigned_shifts_per_cycle }}
+                                                </div>
+                                                /
+                                                <div style="display: inline-block" id="import_tasks__field__task_cycle_total">
+                                                     {{ task.task_data.extra_data.per_task_cycle_settings.setting_value.total_shifts_per_cycle }}
+                                                </div>
+                                                <i class="fa fa-clock-o" style="color: white;"></i><i class="fa fa-tasks" style="color: white;"></i>
+                                                <span class="custom_tooltip_text">Opções Tarefa/Ciclo<br>A/B onde A é a quantidade de turnos que onde a tarefa<br> deve estar a ser realizada num espaço de B turnos</span>
+                                            </th>
+                                        {% endif %}
+                                        {% if task.task_data.extra_data.per_person_cycle_settings.setting_value != null %}
+                                            <th id="import_tasks__field__people_cycle" class="custom_tooltip" style="margin-left: 10px; margin-right: 10px; margin-top: 0; float:right; white-space: nowrap; color: white; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                                <div style="display: inline-block" id="import_tasks__field__people_cycle_target">
+                                                    {{ task.task_data.extra_data.per_person_cycle_settings.setting_value.assigned_shifts_per_cycle }}
+                                                </div>
+                                                /
+                                                <div style="display: inline-block" id="import_tasks__field__people_cycle_total">
+                                                    {{ task.task_data.extra_data.per_person_cycle_settings.setting_value.total_shifts_per_cycle }}
+                                                </div>
+                                                <i class="fa fa-clock-o" style="color: white;"></i><i class="fa fa-user" style="color: white;"></i>
+                                                <span class="custom_tooltip_text">Opções Tripulante/Ciclo<br>A/B onde A é a quantidade de turnos que cada tripulante<br> deve estar a realizar a tarefa num espaço de B turnos</span>
+                                            </th>
+                                        {% endif %}
+                                        {% if task.task_data.extra_data.sequential_settings.setting_value != null %}
+                                            <th id="import_tasks__field__seq_settings"  class="custom_tooltip" style="margin-left: 10px; margin-right: 10px; margin-top: 0; float:right; white-space: nowrap; color: white; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                                <div style="display: inline-block" id="import_tasks__field__seq_settings_diverse">
+                                                    {% if task.task_data.extra_data.sequential_settings.setting_value.diversify_cast %}V{% else %}F{% endif %}
+                                                </div>
+                                                /
+                                                <div style="display: inline-block" id="import_tasks__field__seq_settings_target">
+                                                    {{ task.task_data.extra_data.sequential_settings.setting_value.number_of_sequential_shifts }}
+                                                </div>
+                                                <i class="fa fa-chain" style="color: white;"></i>
+                                                <span class="custom_tooltip_text">Opções sequencias<br>A/B onde A é V caso os turnos devam ser diversificados, F se não.<br>O número de turnos em sequencia onde esta tarefa deve occorrer</span>
+                                            </th>
+                                        {% endif %}
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <h4 style="text-align: start; margin: 0;">
+                                                <a id="import_tasks__field__plan_name" style="pointer-events: none" class="c-font-12 collapsed">   ↳  {{ task.plan_data.name }}</a>
+                                            </h4>
+                                        </th>
+                                        <th class="custom_tooltip" style="margin-left: 10px; margin-right: 10px; margin-top: 7px; float:right; white-space: nowrap; color: #929292; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                            <i class="fa fa-list-alt" style="color: #929292;"></i>
+                                            <div style="display: inline-block" id="import_tasks__field__shift_count">{{ task.plan_data.info.shifts_count }}</div>
+                                            <span class="custom_tooltip_text">Quantidade de turnos que constituem o plano</span>
+                                        </th>
+                                        <th class="custom_tooltip" style="margin-left: 10px; margin-right: 10px; margin-top: 7px; float:right; white-space: nowrap; color: #929292; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">
+                                            <i class="fa fa-user" style="color: #929292;"></i>
+                                            <div style="display: inline-block" id="import_tasks__field__team_count">{{ task.plan_data.info.team_count }}</div>
+                                            <span class="custom_tooltip_text">Quantidade de tripulantes que participam neste plano</span>
+                                        </th>
+                                    </tr>
+                                </table>
+							</div>
+							<div id="panel_collapse_{{ forloop.counter0 }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="panel_heading_{{ forloop.counter0 }}" aria-expanded="false" style="background-color: rgba(14,144,210,0.14); height: 0;">
+								<div class="panel-body c-font-18">
+                                    <div style="text-align: left">
+                                        <b>Descrição da Tarefa:</b>
+                                        <div id="import_tasks__field__task_description">{{ task.task_data.description }}</div>
+                                        <br><br>
+                                        <b>Descrição do Plano:</b>
+                                        <div id="import_tasks__field__plan_description">{{ task.plan_data.description }}</div>
+                                    </div>
+                                    <br>
+                                    <button type="submit" onclick='addTaskFromSelector(
+                                        "{{ task.task_data.display }}",
+                                        "{{ task.task_data.description }}",
+                                        "{{ task.task_data.extra_data.people_per_shift_task.setting_value.min_amount }}",
+                                        "{{ task.task_data.extra_data.people_per_shift_task.setting_value.max_amount }}",
+                                        {% if task.task_data.extra_data.per_person_cycle_settings.setting_value != null %} true, {% else %} false, {% endif %}
+                                        "{{ task.task_data.extra_data.per_person_cycle_settings.setting_value.assigned_shifts_per_cycle }}",
+                                        "{{ task.task_data.extra_data.per_person_cycle_settings.setting_value.total_shifts_per_cycle }}",
+                                        {% if task.task_data.extra_data.per_task_cycle_settings.setting_value != null %} true, {% else %} false, {% endif %}
+                                        "{{ task.task_data.extra_data.per_task_cycle_settings.setting_value.assigned_shifts_per_cycle }}",
+                                        "{{ task.task_data.extra_data.per_task_cycle_settings.setting_value.total_shifts_per_cycle }}",
+                                        {% if task.task_data.extra_data.sequential_settings.setting_value != null %} true, {% else %} false, {% endif %}
+                                        {% if task.task_data.extra_data.sequential_settings.setting_value.diversify_cast != null %} true, {% else %} false, {% endif %}
+                                        "{{ task.task_data.extra_data.sequential_settings.setting_value.number_of_sequential_shifts }}"
+                                    )' class="btn btn-xs btn-info c-btn-square c-btn-uppercase c-btn-bold" style="padding-bottom:2px; margin-top:-3px;">Adicionar ao plano atual</button>
+                                    <a href="/plans/{{ task.plan_data.id }}" target="_blank" class="btn btn-xs c-btn-blue-1 c-btn-circle c-btn-uppercase c-btn-border-2x" style="padding-bottom:2px; margin-top:-3px;">Ver Plano Original</a>
+                                </div>
+							</div>
+						</div>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
